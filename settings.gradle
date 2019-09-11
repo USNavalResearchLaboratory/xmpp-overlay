@@ -1,4 +1,5 @@
 include ':xop', ':xop-android', ':android-daemon-service', ':ClientTesting' //, ':te-api', ':te', ':te-android'
+//project (':xo-gcs').projectDir = new File('../xo-gcs')
 //project (':te').projectDir = new File('../../transport-engine/trunk/te')
 //project (':te-api').projectDir = new File('../../transport-engine/trunk/te-api')
 //project (':te-android').projectDir = new File('../../../transport-engine-nrl/te-android')

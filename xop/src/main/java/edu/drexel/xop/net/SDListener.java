@@ -48,6 +48,11 @@ public interface SDListener {
     void clientDisconnected(JID clientJID);
 
     /**
+     * @param clientJID this JID on a remote instance has reconnected to the XOP domain
+     */
+    void clientReconnected(JID clientJID);
+
+    /**
      * This JID alias was registered for this user
      * @param mucPresence the mucOccupant's presence
      */

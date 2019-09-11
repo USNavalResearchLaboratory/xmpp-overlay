@@ -1,13 +1,82 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+def includeGCS = System.getProperty('include.gcs', 'no')
+
+// For building kotlin
+buildscript {
+    ext.kotlin_version = '1.3.30'
+    ext.coroutines_version = '1.2.1'
+    ext.jni_dir = 'x86_64'
+    if (Os.isFamily(Os.FAMILY_MAC)) {
+        println "*** Mac "
+        ext.jni_dir = 'darwin'
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url "https://kotlin.bintray.com/kotlinx" }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 apply plugin: 'application'
 apply plugin: 'kotlin'
 apply plugin: 'java'
 
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+dependencies {
+    compile 'com.google.guava:guava:26.0-jre'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    if( includeGCS.equals('yes')) {
+        compile fileTree(include: ['*.jar'], dir: 'libs-gcs')
+    } else {
+        compileOnly fileTree(include: ['*.jar'], dir: 'libs-gcs')
+    }
+    compile fileTree(include: ['*.jar'], dir: 'libs-protosd')
+
+    // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+    compile 'javax.xml.bind:jaxb-api:2.3.1'
+    compile 'javax.activation:javax.activation-api:1.2.0'
+
+    compile 'org.json:json:20180813'
+    compile 'org.igniterealtime:tinder:1.3.0'
+    compile 'dom4j:dom4j:1.6.1'
+    compile 'org.slf4j:slf4j-api:1.5.11'
+    compile 'org.slf4j:slf4j-simple:1.5.11'
+    //noinspection DifferentStdlibGradleVersion
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+    testImplementation fileTree(include: ['*.jar'], dir: 'libs-test')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntime(
+            "org.junit.platform:junit-platform-launcher:1.3.1",
+            "org.junit.jupiter:junit-jupiter-engine:5.3.1"
+    )
+    testCompile(
+            "org.igniterealtime.smack:smack-java7:4.3.1",
+            "org.igniterealtime.smack:smack-tcp:4.3.1",
+            "org.igniterealtime.smack:smack-extensions:4.3.1"
+    )
+}
+
+applicationDefaultJvmArgs = ["-Djava.library.path=./jniLibs/x86_64"]
+
 mainClassName = 'edu.drexel.xop.Run'
 def implementationVersion = '1.0'
 applicationName = 'xop'
-
-applicationDefaultJvmArgs = ["-Djava.library.path=./jniLibs/x86_64"]
-def includeGCS = System.getProperty('include.gcs', 'no')
 
 jar {
     manifest {
@@ -26,12 +95,16 @@ task createTarBall (type:Tar){
     dependsOn 'deployXOP'
 
     from ('../') {
-        include 'dist-nogcs/**'
+        if( !includeGCS.equals('yes') ) {
+            include 'dist/**'
+        } else {
+            include 'dist-gcs/**'
+        }
     }
 
     destinationDir = file('../zips')
         baseName = applicationName
-        appendix = 'dist-nogcs'
+        appendix = 'dist'
         version = getTimestamp()
         extension 'tgz'
         compression = Compression.GZIP
@@ -55,6 +128,7 @@ task deployXOP (type:Copy) {
         include 'README.md'
         include 'RUNNING.md'
         include 'CHANGELOG.txt'
+        include 'REVISION.txt'
     }
 
     from('.'){
@@ -63,9 +137,9 @@ task deployXOP (type:Copy) {
     }
 
     if( !includeGCS.equals('yes') ) {
-        into '../dist-nogcs'
-    } else {
         into '../dist'
+    } else {
+        into '../dist-gcs'
     }
 }
 
@@ -96,78 +170,37 @@ task fatJar(type: Jar) {
 }
 
 clean.doFirst {
-    println "Removing ../dist"
-    delete '../dist'
-    println "Removing ../dist-nogcs"
-    delete '../dist-nogcs'
+    if( !includeGCS.equals('yes') ) {
+        println "Removing ../dist"
+        delete '../dist'
+    } else {
+        println "Removing ../dist-gcs"
+        delete '../dist-gcs'
+    }
+}
+
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
+static def getDateTime() {
+    DateFormat df = new SimpleDateFormat("yyyyMMddHHmm")
+    return df.format(new Date())
 }
 
 distZip {
-    into(project.name) {
+    def dt = getDateTime()
+    def archiveBaseName = "$baseName"
+    archiveName archiveBaseName+".zip"
+    into(archiveBaseName) {
         from '.'
         include 'config/*'
         include 'jniLibs/**/*'
+        include 'bin/*'
     }
-}
 
-dependencies {
-    compile 'com.google.guava:guava:26.0-jre'
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    if( includeGCS.equals('yes')) {
-        compile fileTree(include: ['*.jar'], dir: 'libs-gcs')
-    } else {
-        compileOnly fileTree(include: ['*.jar'], dir: 'libs-gcs')
-    }
-    compile fileTree(include: ['*.jar'], dir: 'libs-protosd')
-    compile 'org.json:json:20180813'
-    compile 'org.igniterealtime:tinder:1.3.0'
-    compile 'dom4j:dom4j:1.6.1'
-    compile 'org.slf4j:slf4j-api:1.5.11'
-    compile 'org.slf4j:slf4j-simple:1.5.11'
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
-    testImplementation fileTree(include: ['*.jar'], dir: 'libs-test')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
-    testRuntime(
-            "org.junit.platform:junit-platform-launcher:1.3.1",
-            "org.junit.jupiter:junit-jupiter-engine:5.3.1"
-    )
-    testCompile(
-            "org.igniterealtime.smack:smack-java7:4.3.1",
-            "org.igniterealtime.smack:smack-tcp:4.3.1",
-            "org.igniterealtime.smack:smack-extensions:4.3.1"
-    )
-}
-
-// For building kotlin
-buildscript {
-    ext.kotlin_version = '1.3.21'
-    ext.coroutines_version = '1.0.1'
-    ext.jni_dir = 'x86_64'
-
-//    println("OS name: ${OS_NAME} ${OS_ARCH}")
-//    if( "${OS_NAME}".compareToIgnoreCase("mac os x") == 0) {
-//        println("is on darwin")
-//        ext.jni_dir = 'darwin'
-//    }
-    repositories {
-        mavenCentral()
-        maven { url "https://kotlin.bintray.com/kotlinx" }
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
+    into(archiveBaseName) {
+        from '..'
+        include 'REVISION.txt'
     }
 }
 
@@ -183,5 +216,6 @@ test {
         includeEngines 'junit-jupiter'
         // excludeEngines 'junit-vintage'
     }
-    exclude 'mil/navy/nrl/xop/client/ClientConnectionTest.class' // 2019-02-19: This is a temporary hack
+    // 2019-02-19: This is a temporary hack: does not pass running from the commandline
+    exclude 'mil/navy/nrl/xop/client/ClientConnectionTest.class'
 }

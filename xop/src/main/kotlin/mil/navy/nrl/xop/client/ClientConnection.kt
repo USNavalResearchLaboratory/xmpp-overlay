@@ -46,24 +46,23 @@ private val logger = LogUtils.getLogger(ClientConnection::class.java.name)
 
 val running: AtomicBoolean = AtomicBoolean(true)
 
-//  = LocalPacketProcessor.getInstance()::processPacket
 fun listenForClients(
     bindAddress: InetAddress, port: Int,
     clientManager: ClientManager,
-    localPacketProcessor: LocalPacketProcessor
-    //    processIncomingPacket: (JID, Packet, Boolean) -> Unit
+    localPacketProcessor: LocalPacketProcessor,
+    domain: String
 ): Thread {
 
     val serverSocket = ServerSocket()
     serverSocket.reuseAddress = true
     serverSocket.bind(InetSocketAddress(bindAddress, port))
-    logger.info("Listening for clients on ${serverSocket.localSocketAddress}")
+    logger.info("Listening for clients on ${serverSocket.localSocketAddress} on domain: $domain")
 
     val ret = thread {
         while (running.get()) {
             val socket = serverSocket.accept()
             logger.info("Accepted connection from ${socket.inetAddress}:${socket.port}")
-            val cc = ClientConnection(socket, clientManager, localPacketProcessor)
+            val cc = ClientConnection(socket, clientManager, localPacketProcessor, domain)
             Thread(cc).start()
         }
     }
@@ -72,13 +71,14 @@ fun listenForClients(
 }
 
 fun main(args: Array<String>) = runBlocking {
-    if (args.size < 2) {
-        println("Usage ClientConnectionKt <bindInterface> <port>")
+    if (args.size < 3) {
+        println("Usage ClientConnectionKt <bindInterface> <port> <domain>")
         exitProcess(-1)
     }
 
     val bindAddress = getBindAddress(args[0])
     val port = args[1].toInt()
+    val domain = args[2]
 
     //    val processPacket = fun(jid:JID, packet:Packet, isLocal: Boolean) {
     //                        println("TESTING local $isLocal From $jid, packet: {{$packet}}")
@@ -99,12 +99,16 @@ fun main(args: Array<String>) = runBlocking {
         }
 
         override fun advertiseClient(presence: Presence?) {
+            println("===========> Advertise client $presence")
         }
 
         override fun removeClient(presence: Presence?) {
+            println("===========> REMOVE client $presence")
         }
 
         override fun updateClientStatus(presence: Presence?) {
+            println("===========> Update Status $presence")
+
         }
 
         override fun advertiseMucOccupant(presence: Presence?) {
@@ -130,9 +134,9 @@ fun main(args: Array<String>) = runBlocking {
     val clientManager = ClientManager()
 
     val pm = LocalPacketProcessor(clientManager, sdManager)
-    val clientCoroutine = listenForClients(bindAddress, port, clientManager, pm)
-
-    clientCoroutine.join()
+    val clientCoroutine = listenForClients(bindAddress, port, clientManager, pm, domain)
+    println("listening for clients")
+    // clientCoroutine.join()
 }
 
 /**
@@ -141,8 +145,8 @@ fun main(args: Array<String>) = runBlocking {
 class ClientConnection(
     private var socket: Socket,
     private val clientManager: ClientManager,
-    private val localPacketProcessor: LocalPacketProcessor
-    //private val processIncomingPacket: (JID, Packet, Boolean) -> Unit
+    private val localPacketProcessor: LocalPacketProcessor,
+    private val domain: String = XOP.DOMAIN
 ) : XOPConnection {
     data class Feature(
         val localName: String,
@@ -179,14 +183,14 @@ class ClientConnection(
     private var authenticated = false
 
     override fun writeRaw(bytes: ByteArray?) {
-        logger.finest("writing bytes")
+        logger.finest("writing ${bytes?.size} bytes to $jid")
         if (socket.isConnected) {
             outputStream.write(bytes)
             outputStream.flush()
         } else {
             logger.fine("not writing because socket not connected")
         }
-        logger.finest("wrote bytes")
+        logger.finest("wrote ${bytes?.size} bytes to $jid")
     }
 
     override fun processCloseStream() {
@@ -248,73 +252,85 @@ class ClientConnection(
         logger.info("Processing new Client Connection")
 
 
+        try {
+
         var eventType: Int
-        // get the stax parser
-        while (xmlStreamReader.hasNext()) {
-            eventType = xmlStreamReader.next()
-            logger.finer("processing eventType $eventType")
-            when (eventType) {
-                XMLStreamConstants.START_DOCUMENT -> {
-                    logger.finer("Start of the document")
-                    if (logger.isLoggable(Level.FINER)) {
-                        logger.finer("localName ${xmlStreamReader.localName}")
-                    }
-                }
-                XMLStreamConstants.START_ELEMENT -> {
-                    logger.finer("Start Element again")
-                    if (currentState != ClientConnectionState.STANZA_EXCHANGE)
-                        processStartElement()
-                    else {
-                        logger.fine("STANZA_EXCHANGE state, building element")
-                        val element = buildElement()
-                        val packet: Packet
-                        when (element.name) {
-                            "iq" -> {
-                                logger.fine("IQ message: ${element.asXML()}")
-                                packet = IQ(element)
-                            }
-                            "presence" -> {
-                                logger.fine("Presence message: ${element.asXML()}")
-                                packet = Presence(element)
-                            }
-                            "message" -> {
-                                logger.fine("message message: ${element.asXML()}")
-                                packet = Message(element)
-                            }
-                            else -> {
-                                logger.warning("should not happen!")
-                                packet = Message()
-                            }
+            // get the stax parser
+            while (xmlStreamReader.hasNext()) {
+                eventType = xmlStreamReader.next()
+                logger.finer("processing eventType $eventType")
+                when (eventType) {
+                    XMLStreamConstants.START_DOCUMENT -> {
+                        logger.finer("Start of the document")
+                        if (logger.isLoggable(Level.FINER)) {
+                            logger.finer("localName ${xmlStreamReader.localName}")
                         }
-                        packet.from = jid
-                        //                        logger.fine("Calling processIncomingPacket with $jid $packet")
-                        localPacketProcessor.processPacket(jid!!, packet)
                     }
-                }
+                    XMLStreamConstants.START_ELEMENT -> {
+                        logger.finer("Start Element again")
+                        if (currentState != ClientConnectionState.STANZA_EXCHANGE)
+                            processStartElement()
+                        else {
+                            logger.fine("STANZA_EXCHANGE state, building element")
+                            val element = buildElement()
+                            val packet: Packet
+                            when (element.name) {
+                                "iq" -> {
+                                    logger.fine("IQ message: ${element.asXML()}")
+                                    packet = IQ(element)
+                                }
+                                "presence" -> {
+                                    logger.fine("Presence message: ${element.asXML()}")
+                                    packet = Presence(element)
+                                }
+                                "message" -> {
+                                    logger.fine("message message: ${element.asXML()}")
+                                    packet = Message(element)
+                                }
+                                else -> {
+                                    logger.warning("should not happen!")
+                                    packet = Message()
+                                }
+                            }
+                            packet.from = jid
+                            //                        logger.fine("Calling processIncomingPacket with $jid $packet")
+                            localPacketProcessor.processPacket(jid!!, packet)
+                        }
+                    }
 
-                XMLStreamConstants.END_ELEMENT -> {
-                    val localName = xmlStreamReader.localName
-                    val uri = xmlStreamReader.namespaceURI
+                    XMLStreamConstants.END_ELEMENT -> {
+                        val localName = xmlStreamReader.localName
+                        val uri = xmlStreamReader.namespaceURI
 
-                    logger.fine("END Element $localName $uri")
-                    processCloseStream()
-                }
+                        logger.fine("END Element $localName $uri")
+                        processCloseStream()
+                    }
 
-                XMLStreamConstants.END_DOCUMENT -> {
-                    logger.finer("End of the document")
-                }
+                    XMLStreamConstants.END_DOCUMENT -> {
+                        logger.finer("End of the document")
+                    }
 
-                else -> {
-                    logger.info("UNHANDLED Event Type in main stream processor $eventType")
-                }
-            } // end when(eventType)
-        } // end while hasNext()
-        running.set(false)
-        logger.info("closing XMLStreamReader")
-        xmlStreamReader.close()
-        logger.info("closing socket")
-        socket.close()
-        logger.info("closed connection")
+                    XMLStreamConstants.CHARACTERS -> {
+                        val chars = xmlStreamReader.textCharacters
+                        logger.fine("received characters: $chars")
+                    }
+                    else -> {
+                        logger.info("UNHANDLED Event Type, $eventType,  in main stream processor")
+                    }
+                } // end when(eventType)
+            } // end while hasNext()
+        } finally {
+            processCloseStream()
+
+            running.set(false)
+            logger.info("closing XMLStreamReader")
+            xmlStreamReader.close()
+            logger.info("closing socket")
+            socket.close()
+            logger.info("closed connection")
+
+        }
+
     }
 
     private fun processStartElement() {
@@ -393,8 +409,8 @@ class ClientConnection(
             if (fromJIDStr != null && jid == null) {
                 jid = JID(fromJIDStr)
 
-                if (jid?.domain != XOP.DOMAIN) {
-                    logger.info("from domain is not the same as ${XOP.DOMAIN} closing")
+                if (jid?.domain != this.domain) {
+                    logger.info("from domain is not the same as ${this.domain} closing")
                     closeConnection()
                     return
                 }
@@ -406,9 +422,13 @@ class ClientConnection(
                 logger.info("changing state to $nextState")
                 currentState = nextState
                 logger.info("New stream jid $jid.")
+                var toJID = ""
+                if (jid != null){
+                    toJID = "to='$jid'"
+                }
                 logger.info("Sending open stream with id $streamId")
                 var sendStr =
-                    "<stream:stream from='${XOP.DOMAIN}' to='$jid' id='$streamId' " +
+                    "<stream:stream from='${this.domain}' ${toJID} id='$streamId' " +
                             "xmlns=\"jabber:client\" xmlns:stream=\"http://etherx.jabber.org/streams\"" +
                             " version=\"1.0\" xml:lang='en'>"
 
@@ -583,8 +603,8 @@ class ClientConnection(
             password = creds[2]
         }
         if (logger.isLoggable(Level.FINEST))
-            logger.finest("Authenticating username: $username password: $password")
-        val id = "$username@${XOP.DOMAIN}"
+            logger.finest("Authenticating username: $username password: [MASKED]")
+        val id = "$username@${this.domain}"
 
         authenticated =
                 authenticationProvider.authenticate(JID(id), password)
@@ -605,6 +625,7 @@ class ClientConnection(
 
     }
 
+    @Throws(IOException::class)
     private fun negotiateTLS() {
         logger.info("wait for sendQueue to empty")
         while (!sendQueue.isEmpty()) {
@@ -616,7 +637,7 @@ class ClientConnection(
         logger.info("Converting socket for $clientKey into SSL")
         logger.info("stream Reader $xmlStreamReader")
 
-        try {
+        // try {
             val sock = transformToSSLSocket(socket)
             sock.useClientMode = false
             logger.finer("Starting ssl handshake")
@@ -625,7 +646,6 @@ class ClientConnection(
             // get the SSL versions jid the new socket ...
             socket = sock
             inputStream = sock.inputStream
-            ////            xmlStreamReader.close()
             xmlStreamReader = xmlif.createXMLStreamReader(inputStream)
             running.set(false)
             // kicking off new sending thread
@@ -635,13 +655,13 @@ class ClientConnection(
             streamId = Utils.generateID(10)
             //
 
-        } catch (e: IOException) {
-            logger.severe("Error getting input / output stream jid client socket (SSL).")
-            e.printStackTrace()
-        } catch (e: Exception) {
-            logger.severe("Error transforming socket to SSL.")
-            e.printStackTrace()
-        }
+        // } catch (e: IOException) {
+        //     logger.severe("Error getting input / output stream jid client socket (SSL).")
+        //     e.printStackTrace()
+        // } catch (e: Exception) {
+        //     logger.severe("Error transforming socket to SSL.")
+        //     e.printStackTrace()
+        // }
         logger.info("converted stream Reader to ssl $xmlStreamReader")
     }
 
@@ -658,7 +678,7 @@ class ClientConnection(
     ) {
         try {
             logger.fine("Setting up keystore...")
-            val context = SSLContext.getInstance("TLS")
+            val context = SSLContext.getInstance("TLSv1.2")
             val keyManager = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
             val trustManager =
                 TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
@@ -679,8 +699,8 @@ class ClientConnection(
             logger.severe("Error while setting KeyStore: " + e.message)
         } catch (e: UnrecoverableKeyException) {
             logger.severe("Could not recover key: " + e.message)
-        } catch (e: KeyManagementException) {
-            logger.severe("Error with KeyManager: " + e.message)
+        // } catch (e: KeyManagementException) {
+        //     logger.severe("Error with KeyManager: " + e.message)
         }
 
     }
@@ -753,8 +773,13 @@ class ClientConnection(
                 socket.port,
                 true
             ) as SSLSocket
-            sock.enabledProtocols = sock.supportedProtocols
+            // sock.enabledProtocols = sock.supportedProtocols.filter {
+            //         protocol -> protocol != "TLSv1" && !protocol.contains("SSL") }.toTypedArray()
             sock.enabledCipherSuites = sock.supportedCipherSuites
+                // .filter {
+                //     protocol -> protocol.contains("ECDHE") || protocol.contains("DHE") }.toTypedArray()
+            sock.enabledProtocols.asList().forEach(logger::finer)
+            sock.enabledCipherSuites.asList().forEach(logger::finer)
             return sock
         } else {
             logger.severe("Couldn't open SSL Socket, the SSLServerSocketFactory was null")

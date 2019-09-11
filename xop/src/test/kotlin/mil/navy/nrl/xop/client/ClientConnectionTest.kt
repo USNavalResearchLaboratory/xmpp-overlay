@@ -1,7 +1,6 @@
 package mil.navy.nrl.xop.client
 
 import edu.drexel.xop.core.ClientManager
-import edu.drexel.xop.core.XOProxy
 import edu.drexel.xop.net.SDListener
 import edu.drexel.xop.net.SDManager
 import edu.drexel.xop.packet.LocalPacketProcessor
@@ -20,8 +19,6 @@ import org.jivesoftware.smack.roster.Roster
 import org.jivesoftware.smack.tcp.XMPPTCPConnection
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
 import org.jxmpp.jid.impl.JidCreate
 import org.xmpp.packet.JID
 import org.xmpp.packet.Presence
@@ -133,7 +130,7 @@ class ClientConnectionTest {
         }
         val localPacketProcessor = LocalPacketProcessor(clientManager, sdManager)
         listenThread = GlobalScope.launch {
-            listenForClients(loopbackAddr, 5222, clientManager, localPacketProcessor)
+            listenForClients(loopbackAddr, 5222, clientManager, localPacketProcessor, "localhost")
         }
         logger.info("started clt on $loopbackAddr")
     }

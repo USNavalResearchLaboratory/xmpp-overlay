@@ -1,9 +1,5 @@
 package edu.drexel.xop.util;
 
-/**
- * (c) 2013 Drexel University
- */
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,7 +24,7 @@ public class XopProperties {
     private static final String DEFAULT_FILE_LOCATION = "config/xop.properties";
     
     private static Properties properties = null;
-    private static HashMap<String, String> comments = new HashMap<String, String>();
+    private static HashMap<String, String> comments = new HashMap<>();
     /**
      * 
      * Description: loads default XOP Properties for android. 
@@ -116,17 +112,15 @@ public class XopProperties {
     private static Properties defaultProperties() {
         logger.finer("setting DefaultProperties");
         Properties props = new Properties();
+
         props.setProperty(XOPKEYS.DOMAIN, "proxy");
         comments.put(XOPKEYS.DOMAIN, "The domain name for this proxy instance.");
 
         props.setProperty(XOPKEYS.PORT, "5222");
         comments.put(XOPKEYS.PORT, "The port to run the XMPP server on (for XMPP clients).");
 
-        props.setProperty(XOPKEYS.MUCPORT, "5250");
-        comments.put(XOPKEYS.MUCPORT, "Port to listen on for MUC traffic.");
-
         props.setProperty(XOPKEYS.BIND.INTERFACE, "eth0");
-        comments.put(XOPKEYS.BIND.INTERFACE, "A list of default interfaces separated by commas in order of preference");
+        comments.put(XOPKEYS.BIND.INTERFACE, "The interface to listen for XMPP clients or 'ANY' for all interfaces");
 
         props.setProperty(XOPKEYS.ENABLE.GATEWAY, "false");
         comments.put(XOPKEYS.ENABLE.GATEWAY, "Set to true to enable gatewaying to another XMPP server via dialback protocol, false to disable");
@@ -168,8 +162,8 @@ public class XopProperties {
 
         /* ---- SDS Presence Transport ---- */
 
-        props.setProperty(XOPKEYS.SDS.SERVICE, "groupcomms");
-        comments.put(XOPKEYS.SDS.SERVICE, "choose which Service discovery system to use (for presence), default 'groupcomms'");
+        props.setProperty(XOPKEYS.SDS.SERVICE, "norm-transport");
+        comments.put(XOPKEYS.SDS.SERVICE, "choose which Service discovery system to use (for presence), default 'norm-transport'");
 
         props.setProperty(XOPKEYS.SDS.INDI.ADDRESS, "225.0.2.186");
         comments.put(XOPKEYS.SDS.INDI.ADDRESS, "The multicast address for INDI to bind to. default 224.0.1.186");
@@ -208,12 +202,18 @@ public class XopProperties {
                 "True if messages and presences domains are rewritten from the XOP.DOMAIN to the XOP.GATEWAYDOMAIN");
 
         /* ---- Transport ---- */
-        props.setProperty(XOPKEYS.TRANSPORT.SERVICE, "groupcomms");
+        props.setProperty(XOPKEYS.TRANSPORT.SERVICE, "norm-transport");
         comments.put(XOPKEYS.TRANSPORT.SERVICE,
                 "Transport service to use: [transport-engine, groupcomms, norm-transport, simple-transport]");
 
+        props.setProperty(XOPKEYS.TRANSPORT.SEND_INTERFACE, "ANY");
+        comments.put(XOPKEYS.TRANSPORT.SEND_INTERFACE, "Bound interface to SEND transport messages or 'ANY' for all interfaces");
+
+        props.setProperty(XOPKEYS.TRANSPORT.RECV_INTERFACE, "ANY");
+        comments.put(XOPKEYS.TRANSPORT.RECV_INTERFACE, "Bound interface to RECEIVE transport messages or 'ANY' for all interfaces");
+
         props.setProperty(XOPKEYS.TRANSPORT.ADDRESS, "225.0.87.4");
-        comments.put(XOPKEYS.TRANSPORT.ADDRESS, "default multicast group for groupcomms");
+        comments.put(XOPKEYS.TRANSPORT.ADDRESS, "default multicast group for transport");
         props.setProperty(XOPKEYS.TRANSPORT.PORTRANGE, "10001-10001");
         comments.put(XOPKEYS.TRANSPORT.PORTRANGE,"Port range for sending/receiving");
 

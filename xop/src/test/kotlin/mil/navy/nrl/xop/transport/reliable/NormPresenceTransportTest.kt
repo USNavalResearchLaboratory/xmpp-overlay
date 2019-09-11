@@ -3,7 +3,6 @@ package mil.navy.nrl.xop.transport.reliable
 import edu.drexel.xop.core.ClientManager
 import edu.drexel.xop.net.SDListener
 import edu.drexel.xop.packet.TransportPacketProcessor
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import mil.navy.nrl.norm.NormInstance
 import mil.navy.nrl.norm.NormNode
@@ -16,6 +15,7 @@ import org.xmpp.packet.JID
 import org.xmpp.packet.Packet
 import org.xmpp.packet.Presence
 import java.net.InetAddress
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Execution(ExecutionMode.SAME_THREAD)
@@ -45,6 +45,10 @@ internal class NormPresenceTransportTest {
     private val sdListener = object : SDListener {
         override fun clientDisconnected(clientJID: JID?) {
             println("----> CLIENT DISCONNECTED $clientJID")
+        }
+
+        override fun clientReconnected(clientJID: JID?) {
+            println("----> CLIENT RECONNECTED $clientJID")
         }
 
         override fun gatewayAdded(address: InetAddress, domain: JID) {}
@@ -85,11 +89,12 @@ internal class NormPresenceTransportTest {
     private val normInstance = NormInstance()
 
     private var mockSession: NormSession? = null
-    private var normPresenceTransport: NormPresenceTransport? = null
+    // private var normPresenceTransport: NormPresenceTransport? = null
 
     @BeforeEach
     fun setUp() {
         println("before Each setup")
+        normInstance.restartInstance()
     }
 
     @AfterEach
@@ -103,53 +108,101 @@ internal class NormPresenceTransportTest {
     //     normInstance.destroyInstance()
     // }
 
+
+    private fun startSenderReceiverSessions(senderSession: NormSession, receiverSession: NormSession) {
+        val randGen = Random(System.currentTimeMillis())
+
+        val randInt = randGen.nextInt()
+        logger.fine("-- Creating new senderSession nodeId ${senderSession.localNodeId}; randInt $randInt")
+        val senderBufferSpace:Long = 256 * 256L
+        val segmentSize = 1400
+        val blockSize:Short = 64
+        val numParity:Short = 16
+
+        // senderSession.setGrttProbingMode(NormProbingMode.NORM_PROBE_ACTIVE);
+        // senderSession.setReportInterval(10.0);
+        senderSession.setRxPortReuse(true)
+        senderSession.setMulticastInterface("lo")
+
+        senderSession.startSender(randInt, senderBufferSpace, segmentSize, blockSize, numParity)
+
+        logger.fine("-- Creating new receiverSession nodeId ${receiverSession.localNodeId}")
+        val receiverBufferSpace:Long = 256 * 256;
+        // receiverSession.setRxCacheLimit(rxCacheMax)
+        receiverSession.setRxPortReuse(true)
+        receiverSession.setMulticastInterface("lo")
+        receiverSession.startReceiver(receiverBufferSpace)
+    }
+
     @Test
     fun testUpdateMUCOccupants() = runBlocking {
+        val iface = "lo"
+
         mockSession = normInstance.createSession(
             "225.1.2.5", 10000,
             NormNode.NORM_NODE_ANY
         )
-        normPresenceTransport = NormPresenceTransport(
-            mockSession!!, InetAddress.getLocalHost(), 10000,
-            NORMNode(mutableMapOf(), 10, 0, mutableMapOf(), mutableSetOf(), true),
+        startSenderReceiverSessions(mockSession!!, mockSession!!)
+
+        // val normNode = NORMNode(mutableMapOf(), 10, 0, mutableMapOf(), mutableSetOf(), mockSession, true)
+        val normPresenceTransport = NormPresenceTransport(
+            mutableMapOf(iface to mockSession!!),
+            mutableMapOf(iface to mockSession!!),
+            InetAddress.getLocalHost(), 10000,
+            10,
             transportPacketProcessor, sdListener, false, this,
             10, 15
         )
+        println("Created $normPresenceTransport")
+        // val normPresenceTransport = normPresenceTransport!!
 
-        val normPresenceTransport = normPresenceTransport!!
-
-        val makeAssertions = { room: JID, src: JID, srcOccJID: JID ->
-            assertTrue(
-                normPresenceTransport.mucRooms.containsKey(room),
-                "$room not in ${normPresenceTransport.mucRooms}"
-            )
-            assertTrue(normPresenceTransport.mucRooms[room]!!.occupants.containsKey(src))
-            assertTrue(
-                normPresenceTransport.mucRooms[room]!!.occupants[src]!!.occupantJID == srcOccJID,
-                "occupants: ${normPresenceTransport.mucRooms[room]!!.occupants[src]}"
-            )
-        }
+        val makeAssertions = {
+                room: JID, src: JID, srcOccJID: JID ->
+                assertTrue(
+                    normPresenceTransport.mucRooms.containsKey(room),
+                    "$room not in ${normPresenceTransport.mucRooms}"
+                )
+                assertTrue(normPresenceTransport.mucRooms[room]!!.occupants.containsKey(src))
+                assertTrue(
+                    normPresenceTransport.mucRooms[room]!!.occupants[src]!!.nick == srcOccJID.resource,
+                    "nick not found ${srcOccJID.resource}, occupants: ${normPresenceTransport.mucRooms[room]!!.occupants[src]}"
+                )
+            }
 
         // Updating mucOccupants
-        normPresenceTransport.updateDiscoveredRooms(setOf(room.toBareJID()))
-        val remoteMUCOccupants = mapOf(
-            Pair(
-                user1,
-                mutableSetOf(roomUser1.toString())
-            )
+        val mucPresence = Presence()
+        mucPresence.from = user1
+        mucPresence.to = roomUser1
+        mucPresence.addChildElement("x", "http://jabber.org/protocol/muc")
+        val transportMetadata = TransportMetadata(
+            0L, TransportType.PresenceTransport,
+            TransportSubType.MUCPresence, 0L
         )
-        normPresenceTransport.updateMUCOccupants(1, remoteMUCOccupants)
+
+        normPresenceTransport.handleTransportData(1L, mockSession!!, transportMetadata, mucPresence.toXML(),
+            mucPresence.toXML().toByteArray(Charsets.UTF_8))
         println("Added $user1 = $roomUser1Str : ${normPresenceTransport.mucRooms}\n\n")
         makeAssertions(room, user1, roomUser1)
 
         // -- Adding user2, removing user1
-        val replacedMUCOccupants = mapOf(
-            Pair(
-                user2,
-                mutableSetOf(roomUser2Str)
-            )
-        )
-        normPresenceTransport.updateMUCOccupants(1, replacedMUCOccupants)
+        val unavailPresence = mucPresence.createCopy()
+        assertTrue(unavailPresence.deleteExtension("x", "http://jabber.org/protocol/muc"))
+        unavailPresence.type = Presence.Type.unavailable
+        normPresenceTransport.handleTransportData(1L, mockSession!!, transportMetadata,
+            unavailPresence.toXML(),
+            unavailPresence.toXML().toByteArray(Charsets.UTF_8))
+
+        mucPresence.from = user2
+        mucPresence.to = roomUser2
+        normPresenceTransport.handleTransportData(1L, mockSession!!, transportMetadata, mucPresence.toXML(),
+            mucPresence.toXML().toByteArray(Charsets.UTF_8))
+        // val replacedMUCOccupants = mapOf(
+        //     Pair(
+        //         user2,
+        //         mutableSetOf(roomUser2Str)
+        //     )
+        // )
+        // normPresenceTransport.updateMUCOccupants(1, replacedMUCOccupants)
         println(
             "Added $user2 = $roomUser2Str, removed $user1 : " +
                     "${normPresenceTransport.mucRooms}\n\n"
@@ -159,38 +212,56 @@ internal class NormPresenceTransportTest {
         makeAssertions(room, user2, roomUser2)
 
         // -- Removing all users
-        val removedMUCOccupants = mapOf<JID, MutableSet<String>>()
-        normPresenceTransport.updateMUCOccupants(1, removedMUCOccupants)
+        assertTrue(mucPresence.deleteExtension("x", "http://jabber.org/protocol/muc"))
+        mucPresence.type = Presence.Type.unavailable
+        normPresenceTransport.handleTransportData(1L, mockSession!!, transportMetadata, mucPresence.toXML(),
+            mucPresence.toXML().toByteArray(Charsets.UTF_8))
+
+        mucPresence.from = user1
+        mucPresence.to = roomUser1
+        normPresenceTransport.handleTransportData(1L, mockSession!!, transportMetadata, mucPresence.toXML(),
+            mucPresence.toXML().toByteArray(Charsets.UTF_8))
+        // val removedMUCOccupants = mapOf<JID, MutableSet<String>>()
+        // normPresenceTransport.updateMUCOccupants(1, removedMUCOccupants)
         println(
-            "removed all: ${normPresenceTransport.mucRooms}\n" +
+            "removed all from $room: ${normPresenceTransport.mucRooms}\n" +
                     "\n"
         )
         assertTrue(normPresenceTransport.mucRooms[room]!!.occupants.isEmpty())
+        //
+        // // -- re-adding user1
+        // normPresenceTransport.updateMUCOccupants(1, remoteMUCOccupants)
+        // println("Added $user1 = $roomUser1Str : ${normPresenceTransport.mucRooms} \n\n")
+        // makeAssertions(room, user1, roomUser1)
+        //
+        // // -- no change (user1 still in room)
+        // normPresenceTransport.updateMUCOccupants(1, remoteMUCOccupants)
+        // println("Stays the same : ${normPresenceTransport.mucRooms} \n\n")
+        // makeAssertions(room, user1, roomUser1)
+        //
+        // // -- Adding user2 to the room
+        // val bothMUCOccupants = mapOf(
+        //     Pair(user2, mutableSetOf(roomUser2Str)),
+        //     Pair(user1, mutableSetOf(roomUser1Str))
+        // )
+        // normPresenceTransport.updateMUCOccupants(1, bothMUCOccupants)
+        // println(
+        //     "Added $user2 = $roomUser2Str, with $user1 = $roomUser1Str : " +
+        //             "${normPresenceTransport.mucRooms} \n\n"
+        // )
+        // makeAssertions(room, user1, roomUser1)
+        // makeAssertions(room, user2, roomUser2)
 
-        // -- re-adding user1
-        normPresenceTransport.updateMUCOccupants(1, remoteMUCOccupants)
-        println("Added $user1 = $roomUser1Str : ${normPresenceTransport.mucRooms} \n\n")
-        makeAssertions(room, user1, roomUser1)
-
-        // -- no change (user1 still in room)
-        normPresenceTransport.updateMUCOccupants(1, remoteMUCOccupants)
-        println("Stays the same : ${normPresenceTransport.mucRooms} \n\n")
-        makeAssertions(room, user1, roomUser1)
-
-        // -- Adding user2 to the room
-        val bothMUCOccupants = mapOf(
-            Pair(user2, mutableSetOf(roomUser2Str)),
-            Pair(user1, mutableSetOf(roomUser1Str))
+        val redirectTransportMetadata = TransportMetadata(
+            0L, TransportType.PresenceTransportRedirect,
+            TransportSubType.Redirect, origSenderId = 100L
         )
-        normPresenceTransport.updateMUCOccupants(1, bothMUCOccupants)
-        println(
-            "Added $user2 = $roomUser2Str, with $user1 = $roomUser1Str : " +
-                    "${normPresenceTransport.mucRooms} \n\n"
-        )
-        makeAssertions(room, user1, roomUser1)
-        makeAssertions(room, user2, roomUser2)
 
+
+        println("Closing $normPresenceTransport")
         normPresenceTransport.close()
+        println("Closed")
+
     }
 
     @Test
@@ -222,14 +293,21 @@ internal class NormPresenceTransportTest {
             "225.1.2.5", 10000,
             NormNode.NORM_NODE_ANY
         )
-        normPresenceTransport = NormPresenceTransport(
-            mockSession!!, InetAddress.getLocalHost(), 10000,
-            NORMNode(mutableMapOf(), 10, 0, mutableMapOf(), mutableSetOf(), true),
+
+        startSenderReceiverSessions(mockSession!!, mockSession!!)
+
+        val iface = "lo"
+        val normNode = NORMNode(mutableMapOf(), 10, 0, mutableMapOf(), mutableSetOf(), mockSession, true)
+        val normPresenceTransport = NormPresenceTransport(
+            mutableMapOf(iface to mockSession!!),
+            mutableMapOf(iface to mockSession!!),
+            InetAddress.getLocalHost(), 10000,
+            10,
             transportPacketProcessor, sdListener, false, this,
             10, 15
         )
 
-        val normPresenceTransport = normPresenceTransport!!
+        // val normPresenceTransport = normPresenceTransport!!
 
         normPresenceTransport.mucRooms[room] = NormPresenceTransport.NORMRoom(
             room, mutableMapOf(
@@ -267,7 +345,9 @@ internal class NormPresenceTransportTest {
         // assertTrue(normPresenceTransport.mucRooms[room]!!.occupants.containsKey(user2),
         //     "$user2 NOT IN $room AFTER")
 
+        println("Closing $normPresenceTransport")
         // mockSession is closed in the test case
         normPresenceTransport.close()
+        println("Closed")
     }
 }

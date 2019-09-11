@@ -421,28 +421,38 @@ public class Room {
      * @param presence the unavailable presence of the MUC occupant
      */
     public void removeMUCOccupant(Presence presence) {
+
         JID mucOccupantJID = presence.getTo();
         JID clientJID = presence.getFrom();
-
-        //send presences from the user to all local members
-        for(JID jid : clientJIDToNickMap.keySet()) {
-            if (clientManager.isLocal(jid)) {
-                logger.finer("Creating unavailable presence message to send to "+jid);
-                Presence p = new Presence(Presence.Type.unavailable);
-                p.setFrom(mucOccupantJID);
-                p.setTo(jid);
-                Element e = p.addChildElement("x", "http://jabber.org/protocol/muc#user");
-                Element itemElement = new BaseElement("item");
-                itemElement.addAttribute("affiliation", "member");
-                itemElement.addAttribute("jid", clientJID.toString());
-                itemElement.addAttribute("role", "none");
-                if (jid.equals(clientJID)) {
-                    logger.finer("Adding 110 for presence to " + jid);
-                    Element statusCode = new BaseElement("status");
-                    statusCode.addAttribute("code", "110");
+        if (!XOProxy.getInstance().getRoomOccupantIds().contains(presence.getTo())) {
+            clientJID = presence.getTo();
+            mucOccupantJID = presence.getFrom();
+            logger.fine("To field is fullJID " + clientJID + " from is muc occupant " + mucOccupantJID);
+        }
+        if (clientManager.isLocal(presence.getTo())) {
+            logger.fine("Presence message is a direct message to "+presence.getTo()+". Sending directly to client");
+            ProxyUtils.sendPacketToLocalClient(presence, clientManager);
+        } else {
+            //send presences from the user to all local members
+            for (JID jid : clientJIDToNickMap.keySet()) {
+                if (clientManager.isLocal(jid)) {
+                    logger.finer("Creating unavailable presence message to send to " + jid);
+                    Presence p = new Presence(Presence.Type.unavailable);
+                    p.setFrom(mucOccupantJID);
+                    p.setTo(jid);
+                    Element e = p.addChildElement("x", "http://jabber.org/protocol/muc#user");
+                    Element itemElement = new BaseElement("item");
+                    itemElement.addAttribute("affiliation", "member");
+                    itemElement.addAttribute("jid", clientJID.toString());
+                    itemElement.addAttribute("role", "none");
+                    if (jid.equals(clientJID)) {
+                        logger.finer("Adding 110 for presence to " + jid);
+                        Element statusCode = new BaseElement("status");
+                        statusCode.addAttribute("code", "110");
+                    }
+                    e.add(itemElement);
+                    ProxyUtils.sendPacketToLocalClient(p, clientManager);
                 }
-                e.add(itemElement);
-                ProxyUtils.sendPacketToLocalClient(p, clientManager);
             }
         }
 

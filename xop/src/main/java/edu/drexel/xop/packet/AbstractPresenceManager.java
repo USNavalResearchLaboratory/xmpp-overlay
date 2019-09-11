@@ -1,5 +1,7 @@
 package edu.drexel.xop.packet;
 
+import edu.drexel.xop.core.XMPPClient;
+import edu.drexel.xop.net.SDManager;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.tree.DefaultElement;
@@ -9,6 +11,7 @@ import org.xmpp.packet.Packet;
 import org.xmpp.packet.Presence;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,12 +36,18 @@ abstract class AbstractPresenceManager {
 
     protected ClientManager clientManager;
     private RosterListManager rosterListManager;
+    protected SDManager sdManager;
 
-    AbstractPresenceManager(ClientManager clientManager, RosterListManager rosterListManager) {
+    AbstractPresenceManager(ClientManager clientManager, RosterListManager rosterListManager, SDManager sdManager) {
         this.clientManager = clientManager;
         this.rosterListManager = rosterListManager;
+        this.sdManager = sdManager;
     }
 
+    /**
+     * Process presence packet
+     * @param presence the presence packet to send to XOP
+     */
     abstract void processPresencePacket(Presence presence);
 
     /**
@@ -52,7 +61,7 @@ abstract class AbstractPresenceManager {
                 Presence p = new Presence();
                 p.setFrom(user);
                 p.setTo(fromJID);
-                logger.info("sending outgoing packet: "+p.toXML());
+                logger.info("sending outgoing packet: "+p);
                 ProxyUtils.sendPacketToLocalClient(p, clientManager);
             }
         }
@@ -101,6 +110,13 @@ abstract class AbstractPresenceManager {
             case subscribe: // RFC6121 ch 3.1.1
                 handleSubscribePresence(presence);
                 break;
+            case unsubscribed: // RFC6121 ch 3.2
+                handleUnsubscribedPresence(presence);
+                break;
+            case unsubscribe: // RFC6121 ch 3.3
+                handleUnsubscribePresence(presence);
+                break;
+
             default:
                 ProxyUtils.sendPacketToLocalClient(presence, clientManager);
         }
@@ -148,6 +164,16 @@ abstract class AbstractPresenceManager {
         sendPacketLocalTransportGateway(clientManager, rosterPushUpdate);
     }
 
+    /**
+     * Locally process unsubscribe presence according to RFC6121 3.3
+     * @param presence The unsubscribe presence message from the user
+     */
+    private void handleUnsubscribePresence(Presence presence) {
+        Packet packet = generateError(presence, "Unsupported operation", "unsubscribed is not supported");
+        ProxyUtils.sendPacketToLocalClient(packet, clientManager);
+        throw new UnsupportedOperationException("TODO 2019-04-18 unsupported");
+    }
+
     private void sendPacketLocalTransportGateway(ClientManager clientManager, Packet packet) {
         if (clientManager.isLocal(packet.getTo())) {
             ProxyUtils.sendPacketToLocalClient(packet, clientManager);
@@ -161,28 +187,54 @@ abstract class AbstractPresenceManager {
     private void sendPacketTransportGateway(Packet packet) {
         if (XOP.ENABLE.GATEWAY
                 && packet.getTo().getDomain().contains(XOP.GATEWAY.SERVER)) {
-            logger.fine("sending roster push update to the gateway");
+            logger.fine("sending packet to the gateway");
             XOProxy.getInstance().sendToGateway(packet);
         } else {
-            logger.fine(" sending roster push update to the transport system");
+            logger.fine(" sending packet to the one-to-one transport system");
             XOProxy.getInstance().getXopNet().sendToOneToOneTransport(packet);
         }
     }
 
     private void handleProbePresence(Presence presence) {
-        logger.fine("Handling Presence Probe. presence packet " + presence.toXML());
+        logger.fine("Handling Presence Probe. presence packet " + presence);
         // TODO 2016-11-15 fix according to RFC6121 Ch4.3
 
         //forward the probe if it is for a remote client
         if (!clientManager.isLocal(presence.getTo())) {
-            sendPacketTransportGateway(presence);
+            if (XOP.ENABLE.GATEWAY
+                    && presence.getTo().getDomain().contains(XOP.GATEWAY.SERVER)) {
+                logger.fine("sending Presence Probe to the gateway");
+                XOProxy.getInstance().sendToGateway(presence);
+            }
         } else {
-            logger.fine("return to local client");
-            //send an available presence message back
-            Presence localProbe = presence.createCopy();
-            localProbe.setFrom(presence.getTo());
-            localProbe.setTo(presence.getFrom());
-            ProxyUtils.sendPacketToLocalClient(localProbe, clientManager);
+            // Supporting 4.3.2 part 3 and 4 (always have subscriptions)
+
+            XMPPClient client = clientManager.getLocalXMPPClient(presence.getTo());
+            if ( clientManager.clientAvailable(presence.getTo())) {
+                logger.fine("Client is available, responding to presence probe with presence from currentPresence ");
+                Presence currentPresence = client.generateCurrentPresence();
+                currentPresence.setTo(presence.getFrom());
+
+                if (clientManager.isLocal(presence.getFrom())) {
+                    logger.fine("Sending to SDManager: currentPresence: " + currentPresence);
+                    sdManager.updateClientStatus(currentPresence);
+                } else {
+                    logger.fine("Sending to Local clients: currentPresence: " + currentPresence);
+                    ProxyUtils.sendPacketToLocalClient(currentPresence, clientManager);
+                    // send to local clients
+                }
+            } else {
+                logger.fine("Client is unavailable. ");
+                Presence unavail = new Presence(unavailable);
+                unavail.setTo(presence.getFrom());
+                unavail.setFrom(presence.getTo());
+
+            }
+
+            // //send an available presence message back
+            // Presence localProbe = presence.createCopy();
+            // localProbe.setFrom(presence.getTo());
+            // localProbe.setTo(presence.getFrom());
         }
     }
 
@@ -219,6 +271,49 @@ abstract class AbstractPresenceManager {
         // ProxyUtils.sendPacketToLocalClient(subscribedPresence, clientManager);
     }
 
+    /**
+     * RFC 6121 ch 3.2: Subscription Cancellation
+     * NOTE: only should be for LocalPresenceManager
+     *
+     * @param presence the cancellation message
+     */
+    private void handleUnsubscribedPresence(Presence presence) {
+        if (!clientManager.isLocal(presence.getFrom())) {
+            logger.fine("Unsubscribed Presence is from a local user " + presence.getFrom());
+            return;
+        }
+        JID to = presence.getTo();
+        JID from = presence.getFrom();
+
+        // Before cancelling subscription, send unavailable message from all the contact's online resources
+        JID fullJID = clientManager.getLocalXMPPClient(from).getFullJID();
+        Presence unavailablePresence = new Presence(unavailable);
+        unavailablePresence.setFrom(fullJID);
+        unavailablePresence.setID(Utils.generateID(6));
+        sendPacketTransportGateway(unavailablePresence);
+
+        // Send unsubscribed to the user
+        Presence unsubscribedPresence = presence.createCopy();
+        unsubscribedPresence.setFrom(from);
+        unsubscribedPresence.setTo(to);
+        sendPacketTransportGateway(unsubscribedPresence);
+
+        RosterList rosterList = rosterListManager.getRosterList(from);
+        if (rosterList != null) {
+            List<Packet> unsubscribeIQs = rosterList.removeItem(to);
+            for (Packet iq : unsubscribeIQs) {
+                sendPacketLocalTransportGateway(clientManager, iq);
+            }
+        }
+    }
+
+    /**
+     * generate an error message
+     * @param p the packet to respond to
+     * @param type presence packet type
+     * @param error the error message
+     * @return a copy of the packet p converted to error packet type
+     */
     private Presence generateError(Packet p, String type, String error) {
         Presence presence = (Presence)p.createCopy();
         DefaultElement element = new DefaultElement("error");
@@ -251,7 +346,7 @@ abstract class AbstractPresenceManager {
 
         //available
         if(XOP.ENABLE.GATEWAY) {
-            if(presence.getType() == null) {
+            if(presence.isAvailable()) {
                 XOProxy.getInstance()
                         .addClientToRoomAndSendOverGateway(presence, true);
                         // .addClientToRoomAndSendOverGateway(presence.getFrom(), presence.getTo());
@@ -259,10 +354,11 @@ abstract class AbstractPresenceManager {
                 XOProxy.getInstance().removeFromRoomSendOverGateway(presence, true);
             }
         } else {
-            if(presence.getType() == null) {
+            if(presence.isAvailable()) {
                 XOProxy.getInstance().addClientToRoom(presence, true);
             } else if(presence.getType().equals(unavailable)) {
-                XOProxy.getInstance().removeFromRoom(presence, true);
+                JID roomJID = presence.getTo().asBareJID();
+                XOProxy.getInstance().removeFromRoom(roomJID, presence, true);
             }
         }
     }

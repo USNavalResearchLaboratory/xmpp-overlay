@@ -116,7 +116,7 @@ class DiscoIqHandler {
                         if (XOP.ENABLE.STREAM) {
                             unsupported = false;
                             String hostAddress
-                                    = NetUtilsKt.getBindAddress(XOP.TRANSPORT.INTERFACE).getHostAddress();
+                                    = NetUtilsKt.getBindAddress(XOP.TRANSPORT.SEND_INTERFACE).getHostAddress();
 
                             DefaultElement host = new DefaultElement("streamhost");
                             host.addAttribute("host", hostAddress);

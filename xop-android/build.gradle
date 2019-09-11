@@ -43,5 +43,4 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':xop')
     implementation project(':android-daemon-service')
-    // implementation project(':norm')
 }

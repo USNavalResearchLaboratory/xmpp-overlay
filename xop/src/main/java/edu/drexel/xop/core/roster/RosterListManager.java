@@ -28,18 +28,6 @@ public class RosterListManager {
         this.clientManager = clientManager;
     }
 
-    // /**
-    //  *
-    //  * @return singleton RosterListManager
-    //  */
-    // public static RosterListManager instance(){
-    //     if( instance == null ){
-    //         instance = new RosterListManager();
-    //     }
-    //     return instance;
-    // }
-
-
     RosterList createRosterList(IQ rosterGetIq, JID clientJID){
         logger.finer("creating new roster list for "+clientJID);
         RosterList newRoster = new RosterList(rosterGetIq, clientJID, clientManager);

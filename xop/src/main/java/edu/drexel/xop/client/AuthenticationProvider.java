@@ -16,7 +16,6 @@ import java.util.logging.Logger;
  */
 public class AuthenticationProvider {
     private static final Logger logger = LogUtils.getLogger(AuthenticationProvider.class.getName());
-    private static AuthenticationProvider instance = null;
     private ClientManager clientManager;
 
     public AuthenticationProvider(ClientManager clientManager) {
@@ -26,7 +25,10 @@ public class AuthenticationProvider {
     public boolean authenticate(JID jid, String password) {
         if( logger.isLoggable(Level.FINE) ) logger.fine("Authenticate: (" + jid.toBareJID() + ", [password masked])");
         boolean retVal = !clientManager.clientExists(jid) || !clientManager.getAvailableClientJIDs().contains(jid);
-        logger.fine("authenticated? "+retVal);
+        logger.fine("authenticated? "+retVal
+                + "; !clientManager.clientExists(jid) " + (!clientManager.clientExists(jid))
+                + "; !clientManager.getAvailableClientJIDs().contains(jid)"
+                + (!clientManager.getAvailableClientJIDs().contains(jid)));
         return retVal;
     }
 

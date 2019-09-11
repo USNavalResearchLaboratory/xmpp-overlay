@@ -112,15 +112,7 @@ public class XOProxy {
 
         InetAddress clientBindAddress = NetUtilsKt.getBindAddress(XOP.BIND.INTERFACE);
         Thread clientConnectionThread = ClientConnectionKt.listenForClients(clientBindAddress, XOP.PORT,
-                clientManager, localPacketProcessor);
-        // try {
-        //     clt = new Thread(new ClientListenerThread(clientBindAddress, XOP.PORT));
-        //     clt.start();
-        // } catch (IOException ioe) {
-        //     logger.severe("Unable to start ClientListenerThread. Exiting.");
-        //     this.stop();
-        //     return "Unable to listen for XMPP Clients";
-        // }
+                clientManager, localPacketProcessor, XOP.DOMAIN);
 
 		//TODO: This should be more robust, allowing for multiple gateways and retrying connections
 		if(XOP.ENABLE.GATEWAY) {
@@ -214,10 +206,6 @@ public class XOProxy {
 
     public ClientManager getClientManager() {
         return clientManager;
-    }
-
-    public LocalPacketProcessor getLocalPacketProcessor() {
-        return localPacketProcessor;
     }
 
     /**
@@ -339,30 +327,31 @@ public class XOProxy {
         logger.finer("ENTER");
         RoomManager manager = getRoomManager(mucOccupant.getDomain());
         if (manager == null) {
-            logger.warning("Attempted to remove: " + mucOccupant.toString() + ", but that server doesn't exist");
+            logger.warning("Attempted to remove: " + mucOccupant.getDomain() + ", but that RoomManager doesn't exist");
             return null;
         }
-        Room room = manager.getRoom(new JID(mucOccupant.toBareJID()));
+        Room room = manager.getRoom(mucOccupant.asBareJID());
         if (room == null) {
-            logger.warning("Attempted to remove: " + mucOccupant.toBareJID() + ", but that room doesn't exist");
+            logger.warning("Attempted to remove: " + mucOccupant.toBareJID() + ", but that Room doesn't exist");
         }
         return room;
     }
 
     /**
      * When the SD Manager receives notification that a MUC occupant has left, the
+     * @param roomJID the jid of the room
      * @param presence the presence message of the mucOccupant to remove from rooms
      * @param local True if the calling method is a locally connected client,
      *              False if SDListenerImpl is calling
      */
-    public void removeFromRoom(Presence presence, boolean local) {
+    public void removeFromRoom(JID roomJID, Presence presence, boolean local) {
         JID mucOccupant = presence.getTo();
-        Room room = getRoomForMucOccupant(mucOccupant);
-        if(room == null) {
+        Room room = getRoomForMucOccupant(roomJID);
+        if(room != null) {
+            room.removeMUCOccupant(presence);
+        } else {
             logger.severe("No room was found for MUC Occupant: "+mucOccupant);
-            return;
         }
-        room.removeMUCOccupant(presence);
 
         if (local) {
             xopNet.getSDManager().removeMucOccupant(presence);
@@ -377,13 +366,18 @@ public class XOProxy {
      */
     public void removeFromRoomSendOverGateway(Presence presence, boolean removeFromSD) {
         logger.finer("ENTER");
+
         JID mucOccupant = presence.getTo();
         Room room = getRoomForMucOccupant(mucOccupant);
         if (room == null) {
-            logger.severe("Attempted to remove " + mucOccupant + ", but no room found!");
-            return;
+            logger.warning("Attempted to remove " + mucOccupant + ", but no room found! Try search using " + presence.getFrom());
+            mucOccupant = presence.getFrom();
+            room = getRoomForMucOccupant(mucOccupant);
+            if (room == null) {
+                logger.severe("Attempted to remove " + mucOccupant + ", but no room found! not removing muc occupant");
+                return;
+            }
         }
-        JID clientJID = room.getClientJIDForMucOccupant(mucOccupant);
 
         room.removeMUCOccupant(presence);
 
@@ -392,6 +386,7 @@ public class XOProxy {
         }
         if (XOP.ENABLE.GATEWAY) {
             if (logger.isLoggable(Level.FINE)) {
+                JID clientJID = room.getClientJIDForMucOccupant(mucOccupant);
                 logger.fine("Writing UNAVAILABLE presence message for [" + mucOccupant
                         + "] from: [" + clientJID + "] to the Gateway.");
                 logger.fine("PRESENCE: " + presence.toXML());
@@ -456,7 +451,8 @@ public class XOProxy {
                     mucOccupantLeave.setFrom(jidToClose);
                     mucOccupantLeave.setTo(mucOccupantJID);
                     // removeFromRoom(mucOccupantJID, true);
-                    removeFromRoom(mucOccupantLeave, true);
+                    JID roomJID = room.getRoomJid();
+                    removeFromRoom(roomJID, mucOccupantLeave, true);
                 }
             }
         }

@@ -77,7 +77,7 @@ public class MucOccupantDO extends DiscoverableObject {
                         SERVICE_TYPE,
                         sdObject.getSDPropertyValues().getDomain(),
                         XOProxy.getInstance().getXopNet().getHostAddrStr(),
-                        XOP.MUCPORT,
+                        35550,
                 //sdObject.getSDPropertyValues().getMulticastAddress(),
                 //sdObject.getSDPropertyValues().getMulticastPort(),
                         getTxtFieldParams(clientJID, alias)

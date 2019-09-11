@@ -53,9 +53,10 @@ public class XopNetImpl implements XopNet {
             InstantiationException, InitializationException, IllegalAccessException,
             IOException // Exceptions thrown by SDSystem and TransportEngine initialization
     {
-        InetAddress transportAddress = NetUtilsKt.getBindAddress(XOP.TRANSPORT.INTERFACE);
-        this.hostAddrStr = transportAddress.getHostAddress();
-        logger.info("initializing network, client binding to address: " + transportAddress);
+        //
+        // InetAddress transportAddress = NetUtilsKt.getBindAddress(XOP.TRANSPORT.SEND_INTERFACE);
+        // this.hostAddrStr = transportAddress.getHostAddress();
+        logger.info("Initializing transport...");
 
         transportPacketProcessor = new TransportPacketProcessor(clientManager);
         initTransport(transportPacketProcessor);
@@ -107,8 +108,7 @@ public class XopNetImpl implements XopNet {
                 break;
             case "norm-transport":
                 xopNormService = initXopNormService(transportPacketProcessor);
-                oneToOneTransport = xopNormService.createNormTransport(null,
-                        XOP.ENABLE.COMPRESSION);
+                oneToOneTransport = xopNormService.createOneToOneTransport(XOP.ENABLE.COMPRESSION);
                 oneToOnePort = oneToOneTransport.getPort();
                 logger.info("One-to-One NORM for Reliable Transport initialized");
                 break;
@@ -126,17 +126,20 @@ public class XopNetImpl implements XopNet {
 
     private XopNormService initXopNormService(TransportPacketProcessor transportPacketProcessor) throws IOException {
         logger.info("Initializing NORM for Reliable Transport on iface:"
-                + XOP.TRANSPORT.INTERFACE + ", port range: " + XOP.TRANSPORT.PORTRANGE);
+                + XOP.TRANSPORT.SEND_INTERFACE + ", port range: " + XOP.TRANSPORT.PORTRANGE);
         InetAddress multicastGroup = InetAddress.getByName(XOP.TRANSPORT.ADDRESS);
 
-        return new XopNormService(XOP.TRANSPORT.INTERFACE, multicastGroup,
-                XOP.TRANSPORT.PORTRANGE, transportPacketProcessor);
+        long nodeId = XOP.TRANSPORT.NODE_ID;
+        //GroupPortPoolKt.getNodeId(NetUtilsKt.getBindAddresses(XOP.TRANSPORT.SEND_INTERFACE)[0].getHostAddress());
+        return new XopNormService(nodeId, XOP.TRANSPORT.SEND_INTERFACE, XOP.TRANSPORT.RECV_INTERFACE, multicastGroup,
+                XOP.TRANSPORT.PORTRANGE, transportPacketProcessor, XOP.ENABLE.COMPRESSION);
     }
 
     private void initProtoSD() throws InvocationTargetException,
             NoSuchMethodException, InstantiationException, InitializationException,
             IllegalAccessException {
         logger.info("Using ProtoSD for SD management. address: "+XOP.SDS.INDI.ADDRESS);
+
         System.setProperty("net.mdns.address", XOP.SDS.INDI.ADDRESS);
         SDPropertyValues values = new SDPropertyValues();
         // 2018-05-24 remove . from the XOP domain for listening on stuff
@@ -155,13 +158,9 @@ public class XopNetImpl implements XopNet {
 
         logger.info("ProtoSD property value - multicastAddress: "+values.getMulticastAddress());
         InetAddress sdBindAddress;
-        if (XOP.SDS.INTERFACE != null) {
-            sdBindAddress = NetUtilsKt.getBindAddress(XOP.SDS.INTERFACE);
-            logger.info("INTERFACE: " + XOP.SDS.INTERFACE + " using " + sdBindAddress);
-        } else {
-            sdBindAddress = NetUtilsKt.getBindAddress(XOP.TRANSPORT.INTERFACE);
-        }
-        logger.info("SD bind address" + sdBindAddress);
+
+        sdBindAddress = NetUtilsKt.getBindAddress(XOP.SDS.INTERFACE);
+        logger.info("INTERFACE: " + XOP.SDS.INTERFACE + " using " + sdBindAddress);
 
         sdManager = (ProtoSDManager) SDObjectFactory.create(SDInstance.SDS_SYSTEM.INDI,
                 sdBindAddress,
@@ -247,7 +246,7 @@ public class XopNetImpl implements XopNet {
             case "simple-transport":
                 break;
             case "norm-transport":
-                retVal = xopNormService.createNormTransport(roomJID, XOP.ENABLE.COMPRESSION);
+                retVal = xopNormService.createRoomTransport(roomJID, XOP.ENABLE.COMPRESSION);
                 break;
         }
         return retVal;

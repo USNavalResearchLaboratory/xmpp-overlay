@@ -1,4 +1,0 @@
-include ':xop-android', ':xop', ':te-api', ':te', ':android-daemon-service', ':te-android'
-project (':te').projectDir = new File('../../../transport-engine-nrl/te')
-project (':te-api').projectDir = new File('../../../transport-engine-nrl/te-api')
-project (':te-android').projectDir = new File('../../../transport-engine-nrl/te-android')

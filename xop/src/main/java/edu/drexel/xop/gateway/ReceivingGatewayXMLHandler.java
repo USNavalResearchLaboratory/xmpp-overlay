@@ -689,11 +689,16 @@ class ReceivingGatewayXMLHandler extends DefaultHandler {
         }
 
         if( XOProxy.getInstance().getRoomOccupantIds().contains(mucOccupantJID)) {
-            logger.fine("Calling removeFromRoom on :"+p);
-            XOProxy.getInstance().removeFromRoom(p, true);
+            JID roomJID = mucOccupantJID.asBareJID();
+            logger.fine("Calling removeFromRoom " + roomJID + " on :"+p);
+            XOProxy.getInstance().removeFromRoom(roomJID, p, true);
         } else {
             logger.fine(mucOccupantJID + " not in set of RoomOccupantIds, not removing from rooms");
         }
+        /*
+            2019-06-15 The above will not remove muc occupant on openfire servers because the S2S is sending
+            unavailable presence TO the full JID of the
+         */
         ServerDialbackSession.remoteMUCOccupants.remove(mucOccupantJID);
         logger.fine("remoteMUCOccupants: [["+ServerDialbackSession.remoteMUCOccupants+"]]");
 

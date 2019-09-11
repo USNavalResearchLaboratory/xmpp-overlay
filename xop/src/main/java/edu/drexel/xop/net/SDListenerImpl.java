@@ -4,6 +4,7 @@ import edu.drexel.xop.core.ClientManager;
 import edu.drexel.xop.core.XMPPClient;
 import edu.drexel.xop.core.XOProxy;
 import edu.drexel.xop.packet.TransportPacketProcessor;
+import edu.drexel.xop.util.XOP;
 import edu.drexel.xop.util.logger.LogUtils;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Presence;
@@ -55,9 +56,8 @@ public class SDListenerImpl implements SDListener {
     public void clientDiscovered(Presence presence) {
         logger.fine("Presence received: ==" + presence.toXML() + "==");
         logger.fine("New REMOTE client found {{" + presence.getFrom() + "}}");
-        XMPPClient remoteClient = new XMPPClient(presence.getFrom(), presence.getFrom().toString(),
-                presence.getFrom().getResource(),
-                "", null, XMPPClient.NodeStatus.online);
+        XMPPClient remoteClient = new XMPPClient(presence);
+
         clientManager.addDiscoveredXMPPClient(remoteClient);
         clientManager.addJIDToAvailableSet(presence.getFrom());
 
@@ -96,6 +96,10 @@ public class SDListenerImpl implements SDListener {
         transportPacketProcessor.processPacket(presence.getFrom(), presence);
     }
 
+    /**
+     * Notify XOP that a client has disconnected
+     * @param clientJID The JID on a remote instance that is disconnected from the XOP domain
+     */
     public void clientDisconnected(JID clientJID) {
         logger.fine(clientJID + " is disconnected from network");
         XMPPClient disconnectedClient = clientManager.getRemoteXMPPClient(clientJID);
@@ -108,9 +112,24 @@ public class SDListenerImpl implements SDListener {
         transportPacketProcessor.processPacket(updatedPresence.getFrom(), updatedPresence);
     }
 
+    public void clientReconnected(JID clientJID) {
+/*
+        val presence = remoteJIDLastPresence[probeJID]?.createCopy() ?: Presence()
+        if(presence.from == null)
+            presence.from = probeJID
+        val prevStatus = presence.status ?: ""
+        presence.status = "(reconnected) $prevStatus"
+ */
+        XMPPClient disconnectedClient = clientManager.getRemoteXMPPClient(clientJID);
+        disconnectedClient.setStatus("(reconnected)");
+        disconnectedClient.setNodeStatus(XMPPClient.NodeStatus.online);
+
+        Presence reconnectPresence = disconnectedClient.generateCurrentPresence();
+        transportPacketProcessor.processPacket(clientJID, reconnectPresence);
+    }
+
     /**
      * Callback from SDManager for when an alias is registered
-     * TODO 2018-02-27 dnn Change signature to use the Presence Message. Let ProtoSDListener be the interface that creates the Presence message
      * @param mucPresence the muc occupant joining
      */
     public void mucOccupantJoined(Presence mucPresence) {
@@ -129,7 +148,7 @@ public class SDListenerImpl implements SDListener {
     }
 
     public void mucOccupantUpdated(Presence mucPresence) {
-        // TODO 2018-11-21 Implement
+        throw new UnsupportedOperationException("TODO implement mucOccupantUpdated 2018-11-21");
     }
 
     /*

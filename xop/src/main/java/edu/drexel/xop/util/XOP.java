@@ -8,7 +8,6 @@ public interface XOP {
     String DOMAIN = XopProperties.getProperty(XOPKEYS.DOMAIN);
     String CONFERENCE_SUBDOMAIN = XopProperties.getProperty(XOPKEYS.CONFERENCE_SUBDOMAIN);
     int PORT = XopProperties.getIntProperty(XOPKEYS.PORT);
-    int MUCPORT = XopProperties.getIntProperty(XOPKEYS.MUCPORT);
 
     interface BIND {
         String INTERFACE = XopProperties.getProperty(XOPKEYS.BIND.INTERFACE);
@@ -66,7 +65,8 @@ public interface XOP {
         String ADDRESS = XopProperties.getProperty(XOPKEYS.TRANSPORT.ADDRESS);
         String PORTRANGE = XopProperties.getProperty(XOPKEYS.TRANSPORT.PORTRANGE);
         long NODE_ID = XopProperties.getLongProperty(XOPKEYS.TRANSPORT.NODE_ID);
-        String INTERFACE = XopProperties.getProperty(XOPKEYS.TRANSPORT.INTERFACE);
+        String RECV_INTERFACE = XopProperties.getProperty(XOPKEYS.TRANSPORT.RECV_INTERFACE);
+        String SEND_INTERFACE = XopProperties.getProperty(XOPKEYS.TRANSPORT.SEND_INTERFACE);
         int TTL = XopProperties.getIntProperty(XOPKEYS.TRANSPORT.TTL);
 
         interface TE {

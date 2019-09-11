@@ -60,7 +60,7 @@ to "Join a Chat".  Enter the following info:
 ## Build Dependencies and Prerequisites
 XO depends on the following being installed and configured properly:
 
-*  Java 1.8
+*  OpenJDK 8
 *  Transport Engine (optional)
 *  NRL SMF (if you want multi-hop communications)
 
@@ -137,7 +137,7 @@ XO will load upon startup. To override:
 Use commandline properties starting with '-D' to override properties in the
 config/xop.properties file. e.g.
 ```bash
-./start_xop.sh -Dxop.transport.nodeid=100
+./start_xop.sh -Dxop.bind.interface=eth0
 ```
 
 **_Specifying command-line system properties WILL take precedence over the
@@ -204,7 +204,7 @@ The `lib` directory contains all jar dependencies to run XOP.  However, the
 included NORM library and the jni bindings are linux specific, and may not work
 on your machine, since these are platform dependent.  To get NORM working on
 your machine, you may need to obtain the NORM source and build NORM with the
-Java JNI bindings and place the `libnorm.so` and `norm.jar` in jniLibs/`, and
+Java JNI bindings and place the `libnorm.so` and `norm.jar` in `jniLibs/`, and
 rebuild XOP.
 After building (i.e. running `./gradlew`), the `jniLibs/` directory (and its
 contents) are copied into the `dist/` directory.

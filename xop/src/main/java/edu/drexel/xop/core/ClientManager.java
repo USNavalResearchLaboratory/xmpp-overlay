@@ -68,6 +68,11 @@ public class ClientManager {
         return xmppClients.get(new JID(jid.toBareJID()));
     }
 
+    /**
+     *
+     * @param jid client jid
+     * @return the XMPPClient or null if none found
+     */
     public XMPPClient getLocalXMPPClient(JID jid) {
         return localClients.get(new JID(jid.toBareJID()));
     }
@@ -196,6 +201,10 @@ public class ClientManager {
         return xmppClients.containsKey(new JID(jid.toBareJID()) ) ;
     }
 
+    public boolean clientAvailable(JID jid) {
+        return availableClients.contains(jid);
+    }
+
     /**
      * Is the client represented by jid locally connected to this instance of XOP?
      * @param jid the jid to test
@@ -209,5 +218,9 @@ public class ClientManager {
         }
         // return xmppClients.containsKey(jid) && !remoteClients.containsKey(jid);
         return localClients.containsKey(jid);
+    }
+
+    public Set<XMPPClient> getLocalClients() {
+        return new HashSet<>(localClients.values());
     }
 }

@@ -1,26 +1,28 @@
 package edu.drexel.xop.core;
 
 import edu.drexel.xop.util.CONSTANTS;
+import edu.drexel.xop.util.logger.LogUtils;
 import org.dom4j.Element;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Presence;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
- * XMPP client object that contains a XOPConnection, client JID, displayed name,
+ * XMPP client object that contains client JID, displayed name, status, etc
  * Created by duc on 2/27/17.
  */
 
-public class XMPPClient {
+public class XMPPClient implements Serializable {
+    private static Logger logger = LogUtils.getLogger(XMPPClient.class.getName());
     private JID fullJID;
     private JID bareJID;
     private String displayName;
-    private String resource;
+    private String resource; // TODO: 2019-05-20 Support multiple resources (i.e. entity from 2+ diff resources)
     private boolean resourceBound;
     private String status;
     private Presence.Show show;
@@ -28,6 +30,36 @@ public class XMPPClient {
     private boolean online;
     private Date lastUpdated;
     private String lastId;
+
+    // TODO 2019-05-20 Do something with the capabilities XEP-0115
+    private class Pair {
+        private String hash;
+        private String ver;
+        private Pair(String hash, String ver) {
+            this.hash = hash;
+            this.ver = ver;
+        }
+    }
+    private Map<String,Pair> caps;
+
+    public XMPPClient(Presence presence) {
+        this(presence.getFrom(), presence.getFrom().toString(), presence.getFrom().getResource(), presence.getStatus(),
+        presence.getShow(), NodeStatus.online);
+
+        Element c = presence.getChildElement("c", "http://jabber.org/protocol/caps");
+        if( c != null ){
+            if( c.attribute("node") != null
+                    && c.attribute("ver") != null
+                    && c.attribute("hash") != null
+            ) {
+                caps.put(c.attribute("node").getValue(),
+                        new Pair(c.attribute("hash").getValue(), c.attribute("ver").getValue()));
+            } else {
+                logger.finer("Unable to add capabilities per XEP-0115 c element is null");
+            }
+        }
+    }
+
 
     public XMPPClient(JID fullJID,
                       String displayName, String status, Presence.Show show, NodeStatus nodeStatus) {
@@ -38,6 +70,7 @@ public class XMPPClient {
         this.show = show;
         this.nodeStatus = nodeStatus;
         this.resourceBound = false;
+        this.caps = new HashMap<>();
 
     }
 
@@ -95,6 +128,18 @@ public class XMPPClient {
         resourceBound = true;
     }
 
+    public void addCapability(String node, String verificationStr, String hash) {
+        caps.put(node, new Pair(hash, verificationStr));
+    }
+
+    public String getCapabilityVerification(String node) {
+        return caps.get(node).ver;
+    }
+
+    public Set<String> getCapabilityNodes() {
+        return caps.keySet();
+    }
+
     public boolean isResourceBound() {
         return resourceBound;
     }
@@ -134,11 +179,19 @@ public class XMPPClient {
         disconnected
     }
 
+    /**
+     *
+     * @return a new Presence based on the status, show, id, last updated (if necessary). NO to: field is set
+     */
     public Presence generateCurrentPresence() {
         Presence presence = new Presence();
-        presence.setFrom(fullJID);
-        presence.setStatus(status);
-        presence.setShow(show);
+        if (online) {
+            presence.setFrom(fullJID);
+            presence.setStatus(status);
+            presence.setShow(show);
+        } else {
+            presence.setType(Presence.Type.unavailable);
+        }
         if (lastId != null)
             presence.setID(lastId);
         if (lastUpdated != null) {

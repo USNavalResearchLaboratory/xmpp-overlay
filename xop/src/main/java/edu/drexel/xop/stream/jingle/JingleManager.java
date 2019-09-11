@@ -121,6 +121,11 @@ public class JingleManager implements SDListener {
     }
 
     @Override
+    public void clientReconnected(JID clientJID) {
+
+    }
+
+    @Override
     public void clientUpdated(Presence presence) {
     }
 

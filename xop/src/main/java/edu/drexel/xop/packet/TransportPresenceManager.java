@@ -15,11 +15,8 @@ import java.util.logging.Logger;
 class TransportPresenceManager extends AbstractPresenceManager {
     private static Logger logger = LogUtils.getLogger(LocalPresenceManager.class.getName());
 
-    private SDManager sdManager;
-
     TransportPresenceManager(ClientManager clientManager, SDManager sdManager, RosterListManager rosterListManager) {
-        super(clientManager, rosterListManager);
-        this.sdManager = sdManager;
+        super(clientManager, rosterListManager, sdManager);
     }
 
     /**
@@ -59,17 +56,10 @@ class TransportPresenceManager extends AbstractPresenceManager {
             /// this block from handlePresence(presence)
             // JID fromJID = new JID(presence.getFrom().toBareJID());
 
-            sendPresenceToLocalUsersWithDifferentDomain(presence.getFrom(), presence.getType());
-            sendAvailablePresenceToLocalClients(presence.getFrom());
-
-            //notify remote clients
-            // sdManager.advertiseClient(presence);
         } else { // presence is an unavailable presence
             clientManager.removeJIDFromAvailableSet(presence.getFrom());
-
-            //notify remote clients
-            // sdManager.removeClient(presence);
         }
-
+        sendPresenceToLocalUsersWithDifferentDomain(presence.getFrom(), presence.getType());
+        sendAvailablePresenceToLocalClients(presence.getFrom());
     }
 }

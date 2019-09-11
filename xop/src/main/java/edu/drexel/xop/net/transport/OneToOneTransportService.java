@@ -47,7 +47,7 @@ public class OneToOneTransportService implements XOPTransportService, MessageCal
         api.registerMessageCallback(this);
         logger.info("created TransportManager for One-to-One transport");
 
-        senderID = NetUtilsKt.getBindAddress(XOP.TRANSPORT.INTERFACE).getHostName();
+        senderID = NetUtilsKt.getBindAddress(XOP.TRANSPORT.SEND_INTERFACE).getHostName();
 
 	}
 

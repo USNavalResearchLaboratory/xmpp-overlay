@@ -11,7 +11,6 @@ public interface XOPKEYS {
     String DOMAIN = "xop.domain";
     String CONFERENCE_SUBDOMAIN = "xop.conference.subdomain";
     String PORT = "xop.port";
-    String MUCPORT = "xop.muc.port";
 
     interface BIND {
         String INTERFACE = "xop.bind.interface";
@@ -43,7 +42,6 @@ public interface XOPKEYS {
     }
 
     interface SDS {
-        // BR&T: Allow selection of discovery service (protosd vs groupcomms)
         String SERVICE = "xop.sds.service";
         String INTERFACE = "xop.sds.interface";
         interface INDI  {
@@ -76,7 +74,8 @@ public interface XOPKEYS {
         String ADDRESS = "xop.transport.address";
         String PORTRANGE = "xop.transport.portrange";
         String NODE_ID = "xop.transport.nodeid";
-        String INTERFACE = "xop.transport.interface";
+        String SEND_INTERFACE = "xop.transport.send.interface";
+        String RECV_INTERFACE = "xop.transport.recv.interface";
         String TTL = "xop.transport.ttl";
         interface TE {
             String ADDRESS = "xop.transport.te.address";
@@ -89,7 +88,6 @@ public interface XOPKEYS {
             String  CONFIGFILE = "xop.transport.te.configfile";
             String LOGLEVEL = "xop.transport.te.loglevel";
         }
-        // BR&T: GC discovery parameters
         interface GC  {
             String DISCOVERYDELAY = "xop.gc.discovery.delay";
 

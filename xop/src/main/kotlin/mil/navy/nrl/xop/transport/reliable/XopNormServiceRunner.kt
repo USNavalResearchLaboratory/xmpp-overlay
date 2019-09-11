@@ -14,17 +14,18 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) = runBlocking {
-    if (args.size < 4) {
-        println("Usage: XopNormService <iface> <multicastGroup <portRange> <send|recv> <timeout>")
+    if (args.size < 6) {
+        println("Usage: XopNormService <nodeId> <iface> <multicastGroup <portRange> <send|recv> <presenceInterval> <timeout>")
         exitProcess(-1)
     }
 
-    val iface = args[0]
-    val multicastGroup = InetAddress.getByName(args[1])
-    val portRange = args[2]
-    val send = args[3] == "send"
-    val presenceInterval = args[4].toLong()
-    val timeout = args[5].toInt()
+    val nodeId = args[0].toLong()
+    val iface = args[1]
+    val multicastGroup = InetAddress.getByName(args[2])
+    val portRange = args[3]
+    val send = args[4] == "send"
+    val presenceInterval = args[5].toLong()
+    val timeout = args[6].toInt()
     val ct = AtomicInteger()
     val clientManager = ClientManager()
     val transportPacketProcessor = object : TransportPacketProcessor(clientManager) {
@@ -36,6 +37,9 @@ fun main(args: Array<String>) = runBlocking {
     val sdListener = object : SDListener {
         override fun clientDisconnected(clientJID: JID?) {
             println("----> CLIENT DISCONNECTED $clientJID")
+        }
+        override fun clientReconnected(clientJID: JID?) {
+            println("----> CLIENT RECONNECTED $clientJID")
         }
 
         override fun gatewayAdded(address: InetAddress, domain: JID) {}
@@ -74,13 +78,12 @@ fun main(args: Array<String>) = runBlocking {
     }
 
     // Create a XopNormService object as a receiver
-    val xopNormService = XopNormService(iface, multicastGroup, portRange, transportPacketProcessor)
-    //val launched = xopNormService.launch {  }
+    val xopNormService = XopNormService(nodeId, iface, iface, multicastGroup, portRange, transportPacketProcessor)
 
+    println("hit enter to continue")
+    readLine()
+    println("enabling presence transport")
     val sdManager = xopNormService.enablePresenceTransport(presenceInterval,timeout, sdListener)
-
-
-    //val normTransport = xopNormService.createNormTransport(JID("room@conference.proxy"), false)
 
     if (send) {
         println("sending only")
@@ -93,7 +96,7 @@ fun main(args: Array<String>) = runBlocking {
         println("advertised client: $available")
 
         val roomJID = JID("room@conference.proxy")
-        val normTransport = xopNormService.createNormTransport(roomJID, false)
+        val normTransport = xopNormService.createRoomTransport(roomJID, false)
         sdManager.advertiseMucRoom(Room(roomJID, clientManager, normTransport))
 
         val mucOccupant = Presence()
@@ -134,6 +137,12 @@ fun main(args: Array<String>) = runBlocking {
         //sendMsgs.join()
     } else {
         println("receiving only")
+        val available = Presence()
+        available.from = JID("rcv${args[0]}@proxy/rsc")
+        available.status = "I'm here!"
+        //delay(2000L)
+        sdManager.advertiseClient(available)
+        println("advertised client: $available")
     }
 
     println("wait for input to shutdown")
@@ -152,7 +161,16 @@ fun main(args: Array<String>) = runBlocking {
         //delay(2000L)
         sdManager.removeClient(unavailable)
         println("======> removed client: ${unavailable.from}")
+    } else {
+        val unavailable = Presence(Presence.Type.unavailable)
+        unavailable.from = JID("rcv@proxy/rsc")
+        //delay(2000L)
+        sdManager.removeClient(unavailable)
+        println("======> removed client: ${unavailable.from}")
     }
+
+    println("wait for input to shutdown")
+    readLine()
 
     xopNormService.shutdown()
     println("shutting down")
@@ -160,7 +178,6 @@ fun main(args: Array<String>) = runBlocking {
 
     //    delay(3000L)
 }
-
 
 //
 //    val thisNode =  ClientNormNode(HashSet(), 100, 0, HashMap(), HashMap())

@@ -26,10 +26,12 @@ public class IqManager {
 
     private ClientManager clientManager;
     private RosterListManager rosterListManager;
+    private PingIqHandler pingHandler;
 
     public IqManager(ClientManager clientManager, RosterListManager rosterListManager) {
         this.clientManager = clientManager;
         this.rosterListManager = rosterListManager;
+        this.pingHandler = new PingIqHandler(this.clientManager);
     }
 
     public void processIQPacket(JID fromJID, Packet p) {
@@ -213,7 +215,7 @@ public class IqManager {
                         break;
 
                     default:
-                        logger.info("default handling: "+child.getNamespaceURI());
+                        logger.finer("default handling: "+child.getNamespaceURI());
                         DiscoIqHandler discoHandler = new DiscoIqHandler(clientManager);
                         discoHandler.processIQPacket(iqPacket);
                 }
@@ -225,7 +227,6 @@ public class IqManager {
                 vCardHandler.processPacket(p);
                 break;
             case "ping":
-                PingIqHandler pingHandler = new PingIqHandler(clientManager);
                 pingHandler.processPacket(p);
                 break;
             default:

@@ -78,12 +78,16 @@ public class TransportPacketProcessor extends AbstractPacketProcessor {
     private void processPresencePacketFromNetwork(Presence presence) {
         if (logger.isLoggable(Level.FINER)) logger.finer("processing presence: " + presence);
 
+        if( transportPresenceManager == null || sdManager == null) {
+            logger.severe("Presence Transport not initialized yet!");
+            return;
+        }
 
         JID contact = presence.getTo();
         JID userJID = presence.getFrom();
         // 2018-11-27 dnn support NormPresenceTransport presence probes
 
-        if (presence.getTo() != null && clientManager.isLocal(contact)) {
+        if (contact != null && clientManager.isLocal(contact)) {
             logger.fine("Presence has a destination and is local, responding");
             if (presence.getType() == probe) {
                 // Follow RFC6121 Ch 4.3
@@ -111,9 +115,12 @@ public class TransportPacketProcessor extends AbstractPacketProcessor {
         for (JID user : clientManager.getLocalClientJIDs()) {
             if (logger.isLoggable(Level.FINE)) logger.fine("local toJID: " + user);
             if (!ProxyUtils.compareJIDs(user, presence.getFrom())) {
-                Presence p = presence.createCopy();
+                Presence p = new Presence(presence.getType());
                 p.setFrom(presence.getFrom());
                 p.setTo(user);
+                p.setStatus(presence.getStatus());
+                p.setPriority(presence.getPriority());
+                p.setShow(presence.getShow());
                 logger.info("sending packet ==" + p.toXML() + "== to local client");
                 ProxyUtils.sendPacketToLocalClient(p, clientManager);
             }

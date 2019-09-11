@@ -7,17 +7,16 @@ import edu.drexel.xop.core.roster.RosterListManager;
 import edu.drexel.xop.net.SDManager;
 import edu.drexel.xop.util.Utils;
 import edu.drexel.xop.util.logger.LogUtils;
+import org.dom4j.DocumentException;
 import org.xmpp.packet.Presence;
 
 import java.util.logging.Logger;
 
 class LocalPresenceManager extends AbstractPresenceManager {
     private static Logger logger = LogUtils.getLogger(LocalPresenceManager.class.getName());
-    private SDManager sdManager;
 
     LocalPresenceManager(ClientManager clientManager, SDManager sdManager, RosterListManager rosterListManager) {
-        super(clientManager, rosterListManager);
-        this.sdManager = sdManager;
+        super(clientManager, rosterListManager, sdManager);
     }
 
     /**
@@ -48,22 +47,30 @@ class LocalPresenceManager extends AbstractPresenceManager {
         client.setStatus(presence.getStatus());
         client.setLastPresenceId(presence.getID());
 
-        if (presence.isAvailable()) {
+        Presence sentPresence;
+        try {
+            sentPresence = (Presence) Utils.packetFromString(
+                    Utils.stripNamespace(presence.toXML(), "jabber:client"));
+        } catch (DocumentException e) {
+            sentPresence = presence;
+        }
+
+        if (sentPresence.isAvailable()) {
             logger.fine("Available Presence");
-            logger.finer("presence: " + presence.toXML());
+            logger.finer("presence: " + sentPresence);
             /// this block from handlePresence(presence)
             // JID fromJID = new JID(presence.getFrom().toBareJID());
 
-            sendPresenceToLocalUsersWithDifferentDomain(presence.getFrom(), presence.getType());
-            sendAvailablePresenceToLocalClients(presence.getFrom());
+            sendPresenceToLocalUsersWithDifferentDomain(sentPresence.getFrom(), sentPresence.getType());
+            sendAvailablePresenceToLocalClients(sentPresence.getFrom());
 
             //notify remote clients
-            sdManager.advertiseClient(presence);
+            sdManager.advertiseClient(sentPresence);
         } else { // presence is an unavailable presence
-            clientManager.removeJIDFromAvailableSet(presence.getFrom());
+            clientManager.removeJIDFromAvailableSet(sentPresence.getFrom());
 
             //notify remote clients
-            sdManager.removeClient(presence);
+            sdManager.removeClient(sentPresence);
         }
 
     }

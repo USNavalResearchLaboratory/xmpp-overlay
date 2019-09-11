@@ -3,6 +3,13 @@
 + : Feature addition
 * : Other / Refactoring
 ********************************************************************************
+[XOP 0.10.2]
+- edits to NORM session establishment
+- using xop.properties nodeId again for Windows testing
+
+[XOP 0.10.1]
++ NormTransport supports multiple interfaces per chat room
++ Tested with JChat 2.1.2
 
 [XOP 0.10.0]
 * Redesigned NORM Transport Service for XO
