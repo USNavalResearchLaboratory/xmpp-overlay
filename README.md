@@ -1,3 +1,13 @@
+# XMPP Overlay Service
+* Version
+  * xop 0.10.0 CWIX 2019
+  * xop 0.9.5 CWIX 2018
+  * xop 0.9.4xAB17 latest version with support for AgileBloodhound 2017
+  * xop 0.99 is based on subversion rev 2598 (See CHANGELOG.txt for more information)
+  * xop 0.9 is based on subversion rev 2355 (See CHANGELOG.txt for more information)
+  * xop 0.8.XX based on subversion revision r2252 
+* Author: Duc Nguyen <dnguyen580@gmail.com>
+
 # About
 The XMPP Overlay Proxy (XOP) is a solution for running XMPP Multi-User Chat
 (MUC) applications in distributed, heterogeneous, serverless environments. Using
@@ -5,18 +15,23 @@ the transport engine (also developed as part of the Groupwise project), XOP
 allows for for serverless, asynchronous, group-oriented messaging and service
 discovery using a variety of standard protocols.
 
-XOP can be used with familiar commercial clients (Pidgin, Spark, iChat, etc.)
+XOP can be used with familiar commercial clients (Pidgin, Xabber, iChat, etc.)
 and gateways to standard enterprise XMPP server infrastructures (e.g, Openfire).
 
 # Quick Start
-## Start XO
-Check out the Transport Engine and XOP trunks.  Set the `TRANSPORT_ENGINE_PATH`
-environment variable to the location of the Transport Engine trunk.
 
-Then, in the XOP trunk, run:
+## Start XO in Linux
 
-    ant
-    ./run.sh
+In the XOP trunk, edit settings.gradle (sample in settings.gradle.sample) to point 
+to proper path for transport engine.
+
+Run:
+
+```bash
+./gradlew deployXOP
+cd dist
+./start_xop.sh
+```
 
 If this didn't produce any errors, XO should be running on the loopback
 interface on port 5222 (the default XMPP server port).
@@ -42,71 +57,104 @@ to "Join a Chat".  Enter the following info:
 * Handle: [whatever, probably best if it matches your username above]
 * Password:  [leave it blank]
 
-# Dependencies
+## Build Dependencies and Prerequisites
 XO depends on the following being installed and configured properly:
 
-*  java 1.7 or higher
-*  transport-engine v0.2
+*  Java 1.8
+*  Transport Engine (optional)
 *  NRL SMF (if you want multi-hop communications)
-*  NRL NORM (if you want to use the NORM protocol)
 
 # Using XOP
-## Building
-To build XOP, run in the same directory as this README:
+XO runs on Android devices and on computers running Linux and Mac.
 
-    ant
+## Android
 
-## Running
-To run, in the same directory as this README:
+As of 2018-02-07, the Android version of XOP requires GCSD from Boeing. This
+isn't included in the distribution. Soon, XO will be tested with
+'norm-transport'
 
-    ./run.sh
+### Prerequisites
+* OpenJDK 8
+* Android SDK 23 
 
-This uses a customized run script. Alternatively, you can run:
+### Building an Android xop.apk
+Android device must allow installing applications outside of Google Play App Store.
 
-    java -jar dist/xop.jar
+To build:
+   
+```bash
+cd [xop root]
+./gradlew assembleDebug 
+```
 
-to run the XOP jar by itself.
+### Run
+* Open XOP app
+* Select "Settings" under the "Menu"
+* Tap the "ON" button. Once XOP is finished initializing, the button will change 
+  text to say "ON"
 
-## Cleaning
-To clean (after a previous build):
+## Linux/Mac
 
-    ant clean
+### Prerequisites
+* Java Development Kit (JDK) 8 (open JDK is ok)
+* Android SDK 18 
+
+### Building
+XOP uses the gradle build system now to build for all platforms
+
+To build XOP for linux and windows, run in the same directory as this README:
+
+```bash
+./gradlew deployXOP
+```
+
+### Run
+To run, in the xop/dist directory:
+
+```bash
+./start_xop.sh [configuration options]
+```
+
+## Windows
+
+### Run
+To run, in the xop/dist directory:
+
+```bash
+./list_nets.sh
+## Make note of the interface name for the active interface
+start_xop.bat -Dxop.bind.interface={interface}
+```
 
 # Configuring XOP
-By default, there is no configuration file.  If you would like to change any
-of the default configuration settings, do one of the following:
+After building XO, there will be a default configuration file, config/xop.properties that 
+XO will load upon startup. To override:
 
-## Configure with a Configuration File (removed whenever you do "ant clean")
-*  Run "dist/generate_config.sh > ../config/xop.properties"
-*  Edit config/xop.properties to make the desired changes.
+```bash
+./start_xop.sh -Dproperties.file=path_to_properties
+```
 
-## Configure with the Command-Line Parameters
-* Run run.sh as normal, but use "-Dparameter=value" to change the desired
-  settings.  For example, "./run.sh -D xop.bind.interface=eth0".
+Use commandline properties starting with '-D' to override properties in the
+config/xop.properties file. e.g.
+```bash
+./start_xop.sh -Dxop.transport.nodeid=100
+```
 
-Specifying command-line system properties WILL take precedence over the
-`config/xop.properties` file.
+**_Specifying command-line system properties WILL take precedence over the
+`config/xop.properties` file._**
 
-## Components
-Components are deployed into the `plugins/` directory. The components are
-enabled by the `xop.enabled.components` property in `config/xop.properties`.
+### Create configuration file
+If you would like to create a xop.properties file, there is a helper script to generate default properties:
 
-### "muc" Component
-This component implements XEP-0045, "Multi-User Chat" and it's respective
-service discovery mechanisms. This is now a part of the core of XOP. NO need to include it as a component in xop.enabled.components properties.
+```bash
+java -cp xop.jar edu.drexel.xop.util.XopProperties > dist/config/xop.properties
+```    
+### Common commandline parameters
 
-### "s2s" Component
-This component implements XEP-0220, "Server Dialback" to enable server-to-server
-federation. Must be used in tandem with the "xog" component
-
-### "xog" Component
-This component gateways messages from a local XOP Instance to a federated
-server. Must be used in tandem with the "s2s" component.
-
-### "ad" Component
-This component sends mDNS advertisements (using protosd), advertising itself as
-an XMPP server, as specified in RFC 6120.  It also advertises itself as an
-"xop-server".
+```bash
+./start_xop.sh -Dxop.enable.gateway=true|false \
+  -Djava.util.logging.config.file={path to logging.properties}
+```
 
 ## Logging
 Logging can be configured by modifying the `config/logging.properties` file
@@ -118,24 +166,50 @@ file.
 
 You can also specify your own logging.properties at the command line:
 
-    ./run.sh -D java.util.logging.config.file=config/logging.properties
-
+```bash
+./start_xop.sh -Djava.util.logging.config.file=config/logging.properties
+```
 or:
+```bash
+java -Djava.util.logging.config.file=config/logging.properties -jar xop-all.jar
+```
 
-    java -Djava.util.logging.config.file=config/logging.properties -jar xop.jar
+## Enabling gatewaying to another enterprise server:
+A XOP instance within a MANET can use an external interface to maintain a persistent
+connection to an enterprise XMPP server, e.g. Openfire. This XOP instance will 
+forward XMPP Presence, IQ, and Messages to/from a standard XMPP server.
 
+### Configuring XOP for Gatewaying
+
+- Import Openfire server certificates into the keystore used by XOP 
+- edit the following properties:
+  ```bash
+  ./start_xop.sh -Dxop.enable.gateway=true -Dxop.gateway.server={servername}
+  ```
+
+- Ensure the servername maps correctly to the openfire server and ip address of the server
+  - e.g. include in `/etc/hosts: <openfire IP address> <openfire server hostname>`
+- ensure the gatewayed XOP instance has the hostname of the proxied 
+  - e.g. include in `/etc/hosts: <external IP address of XOP node> <XO domain>`
+
+### Configuring Openfire
+
+- Enable the following properties:
+  - Dialback protocol (XEP-220)
+  - server self-signed certificates
+  - server tls enabled
+  
 ## NORM
 The `lib` directory contains all jar dependencies to run XOP.  However, the
 included NORM library and the jni bindings are linux specific, and may not work
 on your machine, since these are platform dependent.  To get NORM working on
 your machine, you may need to obtain the NORM source and build NORM with the
-Java JNI bindings and place the `libnorm.so` and `norm-jni.jar` in `lib/`, and
+Java JNI bindings and place the `libnorm.so` and `norm.jar` in jniLibs/`, and
 rebuild XOP.
-
-After building (i.e. running `ant`), the `lib/` directory (and its
+After building (i.e. running `./gradlew`), the `jniLibs/` directory (and its
 contents) are copied into the `dist/` directory.
 
-## Glossary
+# Glossary
 * Client - An XMPP client, e.g. Pidgin, `listen.py`
 * Configuration File - `xop.properties`
 * Local Client - a Client connected to a local XOP Instance (on the same node)
@@ -149,14 +223,4 @@ contents) are copied into the `dist/` directory.
   servers such as OpenFire
 * XOP Instance - a running XOP process, i.e. running `java -jar xop.jar`
 
-## Details
-### Version
-* xop_0.8.1 based on subversion revision r2272 (See CHANGELOG.txt for more information)
 
-### Last Updated
-* 2013-06-17
-
-### Authors
-* Dustin Ingram <dustin@cs.drexel.edu>
-* Rob Lass <urlass@cs.drexel.edu>
-* Duc Nguyen <dn53@drexel.edu>

@@ -1,0 +1,187 @@
+apply plugin: 'application'
+apply plugin: 'kotlin'
+apply plugin: 'java'
+
+mainClassName = 'edu.drexel.xop.Run'
+def implementationVersion = '1.0'
+applicationName = 'xop'
+
+applicationDefaultJvmArgs = ["-Djava.library.path=./jniLibs/x86_64"]
+def includeGCS = System.getProperty('include.gcs', 'no')
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'XOP',
+                    'Implementation-Version': "${implementationVersion}",
+                    'Main-Class': "${mainClassName}"
+    }
+}
+
+static def getTimestamp() {
+    def date = new Date()
+    return date.format('yyyyMMdd.HHmmss')
+}
+
+task createTarBall (type:Tar){
+    dependsOn 'deployXOP'
+
+    from ('../') {
+        include 'dist-nogcs/**'
+    }
+
+    destinationDir = file('../zips')
+        baseName = applicationName
+        appendix = 'dist-nogcs'
+        version = getTimestamp()
+        extension 'tgz'
+        compression = Compression.GZIP
+}
+
+task deployXOP (type:Copy) {
+    dependsOn 'fatJar'
+
+    println("includeGCS: ${includeGCS}")
+
+    from('bin') {
+        include '*.sh'
+        include '*.bat'
+    }
+
+    from('build/libs'){
+        include 'xop-all.jar'
+    }
+
+    from('..') {
+        include 'README.md'
+        include 'RUNNING.md'
+        include 'CHANGELOG.txt'
+    }
+
+    from('.'){
+        include 'jniLibs/'
+        include 'config/'
+    }
+
+    if( !includeGCS.equals('yes') ) {
+        into '../dist-nogcs'
+    } else {
+        into '../dist'
+    }
+}
+
+task fatJar(type: Jar) {
+    dependsOn build
+    manifest {
+        attributes 'Implementation-Title': 'XOP',
+                'Implementation-Version': '1.0',
+                'Main-Class': "${mainClassName}"
+    }
+    baseName = project.name + '-all'
+    from {
+        if( includeGCS.equals('yes')) {
+            configurations.compile.collect {
+                it.isDirectory() ? it : zipTree(it)
+            }
+        } else {
+            configurations.compile.collect {
+                if( !it.getPath().contains('libs-gcs') ) {
+                    it.isDirectory() ? it : zipTree(it)
+                } else {
+                    it
+                }
+            }
+        }
+    }
+    with jar
+}
+
+clean.doFirst {
+    println "Removing ../dist"
+    delete '../dist'
+    println "Removing ../dist-nogcs"
+    delete '../dist-nogcs'
+}
+
+distZip {
+    into(project.name) {
+        from '.'
+        include 'config/*'
+        include 'jniLibs/**/*'
+    }
+}
+
+dependencies {
+    compile 'com.google.guava:guava:26.0-jre'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    if( includeGCS.equals('yes')) {
+        compile fileTree(include: ['*.jar'], dir: 'libs-gcs')
+    } else {
+        compileOnly fileTree(include: ['*.jar'], dir: 'libs-gcs')
+    }
+    compile fileTree(include: ['*.jar'], dir: 'libs-protosd')
+    compile 'org.json:json:20180813'
+    compile 'org.igniterealtime:tinder:1.3.0'
+    compile 'dom4j:dom4j:1.6.1'
+    compile 'org.slf4j:slf4j-api:1.5.11'
+    compile 'org.slf4j:slf4j-simple:1.5.11'
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+    testImplementation fileTree(include: ['*.jar'], dir: 'libs-test')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntime(
+            "org.junit.platform:junit-platform-launcher:1.3.1",
+            "org.junit.jupiter:junit-jupiter-engine:5.3.1"
+    )
+    testCompile(
+            "org.igniterealtime.smack:smack-java7:4.3.1",
+            "org.igniterealtime.smack:smack-tcp:4.3.1",
+            "org.igniterealtime.smack:smack-extensions:4.3.1"
+    )
+}
+
+// For building kotlin
+buildscript {
+    ext.kotlin_version = '1.3.21'
+    ext.coroutines_version = '1.0.1'
+    ext.jni_dir = 'x86_64'
+
+//    println("OS name: ${OS_NAME} ${OS_ARCH}")
+//    if( "${OS_NAME}".compareToIgnoreCase("mac os x") == 0) {
+//        println("is on darwin")
+//        ext.jni_dir = 'darwin'
+//    }
+    repositories {
+        mavenCentral()
+        maven { url "https://kotlin.bintray.com/kotlinx" }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+test {
+    println("using library path: $jni_dir")
+    systemProperties = [
+            'junit.jupiter.execution.parallel.enabled': 'false',
+            "java.library.path": "jniLibs/$jni_dir"
+    ]
+    useJUnitPlatform {
+        // includeTags 'fast', 'smoke & feature-a'
+        // excludeTags 'slow', 'ci'
+        includeEngines 'junit-jupiter'
+        // excludeEngines 'junit-vintage'
+    }
+    exclude 'mil/navy/nrl/xop/client/ClientConnectionTest.class' // 2019-02-19: This is a temporary hack
+}

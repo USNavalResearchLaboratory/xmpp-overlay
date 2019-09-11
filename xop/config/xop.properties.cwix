@@ -1,0 +1,243 @@
+##############################
+##### XOP Configurations #####
+##############################
+# The domain name for this proxy instance.
+xop.domain=cv2e.us.177.xo
+# Conference subdomain
+xop.conference.subdomain=conference
+
+# The port to run the XMPP server on (for XMPP clients).
+xop.port=5222
+
+# A list of default interfaces separated by commas in order of preference
+xop.bind.interface=eth0
+
+# set to true if clients must connect via tls, false otherwise
+xop.tls.auth=false
+
+# Where the server keystore is located
+xop.ssl.keystore=config/clientkeystore
+# keystorePKCS12.jks
+
+# Where the truststore for server-to-server connections is located
+xop.ssl.truststore=config/cacerts.jks
+
+# The password for the keystore and truststore
+xop.ssl.password=xopstore
+
+# The hostname of this device.
+xop.hostname=defaulthostname
+
+# Directory in which to look for config files.
+xop.config.dir=./config
+
+# delay
+xop.enable.delay=false
+
+# compress packets before sending on wire
+xop.enable.compression=false
+
+##############################
+##############################
+
+####################################
+### XO Gatewaying Configurations ###
+####################################
+# Set to true to enable gatewaying to another XMPP server via dialback protocol, false to disable
+xop.enable.gateway=false
+
+# The hostname of the external XMPP server to which the gateway should connect.
+#xop.gateway.server=c4ad038.c4ad.ciav.cmil.mil
+#xop.gateway.server=openfire
+xop.gateway.server=cv2eserver2.sd.navy.smil.mil
+
+# The hostname of the external XMPP server to which the gateway should connect.
+#xop.gateway.conference.server=conference.c4ad038.c4ad.ciav.cmil.mil
+#xop.gateway.conference.server=conference.openfire
+xop.gateway.conference.server=conference.cv2eserver2.sd.navy.smil.mil
+
+
+# The bind interface for connecting to the XMPP server.
+xop.gateway.bindinterface=eth1
+
+# The port to connect to on the Gatewayed XMPP server.
+xop.gateway.port=5269
+
+# The interval at which this server should send ping messages to the connected server
+xop.gateway.ping=30000
+
+# Specify if "from" field of the messages (from gateway) should be rewritten before sending to XOP. And to: field
+xop.gateway.rewritedomain=false
+
+# messages coming from the openfire server have the domains rewritten to this value.
+# NOT USED
+#xop.gateway.remoteserver=cv2eserver2.sd.navy.smil.mil
+
+# hostname of the XO Gateway. messages going to the remote server use this domain
+xop.gateway.domain=cv2e.us.177.xo
+#xop.gateway.domain=xog.spawar.ciav.cmil.mil
+#xop.gateway.domain=lav1
+
+# hostname of the XO Gateway for renaming incoming messages
+xop.gateway.conference.domain=conference.cv2e.us.177.xo
+#xop.gateway.conference.domain=conference.xog.spawar.ciav.cmil.mil
+#xop.gateway.conference.domain=conference.lav1
+
+# true to use TLS with a gatewayed server, false otherwise.
+xop.gateway.tlsauth=false
+# timeout in ms OR -1 to disable timeout
+xop.gateway.timeout=-1
+
+# number of times to retry reconnection. -1 to attempt to reconnect indefinitely
+xop.gateway.reconnect=10
+
+xop.gateway.accept.selfsigned.certs=true
+xop.gateway.keystore=config/nrlxogstore
+xop.gateway.truststore=config/nrlxogtruststore
+xop.gateway.keystore.password=xopstore
+xop.gateway.truststore.password=xopstore
+
+##############################
+##############################
+
+
+####################################################
+### Bytestreams in XOP ### NOTE: unsupported for now
+####################################################
+# Set to true to enable bytestreams, false to disable
+xop.enable.stream=false
+
+# The JID to identify the bytestream host
+xop.stream.jid=stream.spawar
+
+# The port on which clients should connect to open a bytestream
+xop.stream.port=7625
+##############################
+##############################
+
+
+#########################################
+#### Transport Configurations #####
+#########################################
+
+# Controls whether to use the Transport Engine ("transport-engine"), GCS
+# ("groupcomms"), "norm-transport", or simple embedded ("simple-transport") for data dissemination.
+# The default is "groupcomms"
+xop.transport.service=norm-transport
+
+xop.transport.nodeid=1
+xop.transport.address=225.0.87.3
+xop.transport.port=6667
+xop.transport.grouprange=225.0.87.5-225.0.87.200
+
+########### Transport Engine #############
+
+# Configuration file
+xop.transport.te.configfile=config/te.properties
+xop.transport.te.loglevel=INFO
+
+# IP address of transport engine instance
+xop.transport.te.address=127.0.0.1
+
+# Port transport engine instance is listening on.
+xop.transport.te.port=1998
+
+# Use reliable transport for MUC and OneToOne, default: false
+xop.transport.te.reliable=true
+
+# Use ordered transport for MUC and OneToOne, default: false
+xop.transport.te.ordered=false
+
+# Time to persist.  Currently, the TE interprets 1 as persist forever, and 0 as do not persist at all.
+xop.transport.te.persist.time=0
+
+# TTL on UDP packets
+xop.transport.protocol.udp.ttl=32
+
+####### XO One-to-One using TransportEngine ###
+# Multicast address that XMPP clients will bind to for one-to-one chats. Uses TransportEngine
+xop.onetoone.address=225.0.87.4
+
+# The port that XOP will listen on when Transport engine is not enabled
+xop.onetoone.port=6667
+
+###########################################
+
+########### GCS Transport Configurations ############
+# The address of the Group Communciations Agent (daemon). The default is "localhost"
+xop.gc.agent.address=127.0.0.1
+# The port number used by the agent. The default is 56789.
+xop.gc.agent.port=56789
+# The group number that GCS will use for discovery messages. The default is 0.
+xop.gc.discovery.group=0
+# The delay for sweeping and signaling XOP SD service (default: 5000ms).
+xop.gc.discovery.delay=5000
+
+#(default = empty)
+xop.transport.gc.rooms.safe=safe@conference.openfire
+#(default = empty)
+xop.transport.gc.rooms.agreed=agreed@conference.openfire
+#(default = empty)
+xop.transport.gc.rooms.ordered=ordered@conference.openfire
+#(default = empty)
+xop.transport.gc.rooms.reliable=reliableroom@conference.openfire
+#(default = *)
+xop.transport.gc.rooms.besteffort=besteffortroom@conference.openfire,room@conference.openfire
+#######################################
+
+############################################
+### Service Discovery using ProtoSD INDI ###
+############################################
+
+# Controls whether to use SimpleTransport ("simple-transport"), INDI ("protosd"),
+# or GCS ("groupcomms")for discovery. The default is "groupcomms".
+xop.sds.service=protosd
+
+# Times a client queries for a service e.g. 0,100,200 (comma separated list of longs)
+xop.sds.indi.cqi=0,100,200,400,800,1600
+
+# Lifetime (TTL) of the service in milliseconds (long)
+xop.sds.indi.ttl=5000
+
+# sets whether the instances of indi allow duplicate adverts or whether duplicate adverts are suppressed.
+xop.sds.indi.allow.duplicates=true
+
+# The multicast address for INDI to bind to. default 222.0.1.101
+xop.sds.indi.address=225.5.37.6
+
+# Number of times to send proactive service cancellations (int)
+xop.sds.indi.numscm=3
+
+# Number of times to readvertise the service (int, -1 = forever)
+xop.sds.indi.numra=-1
+
+# The multicast port for INDI to bind to. default 5353
+xop.sds.indi.port=5353
+
+# Service proactive re-advertisement interval for sending advertisements in milliseconds (long)
+xop.sds.indi.rai=1000
+
+# sets whether the instances of indi allow loopback or not
+xop.sds.indi.allow.loopback=false
+
+# Proactive service cancel notification interval
+xop.sds.indi.sci=2000
+##############################
+##############################
+
+
+# Time to persist.  Currently, the TE interprets 1 as persist forever, and 0 as do not persist at all.
+# xop.transport.persist.time=0
+
+
+##############################
+### XOP Android-specific configurations ###
+#########################################
+
+# Set to true to enable text file logging on the android file system, false to disable
+# xop.android.file.logging=false
+
+# Set to true to enable logging in the app text view, false to disable
+# xop.android.console.logging=false
+##############################
+#############################

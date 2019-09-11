@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- MAIN VIEW -->
+    <string name="app_name">XOP</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_view_log">View Log</string>
+    <string name="start_xop">Start XOP</string>
+    <string name="stop_xop">Stop XOP</string>
+    <string name="discovered_rooms">Discovered Rooms</string>
+    <string name="discovered_users">Discovered Users</string>
+    <string name="local_users">Local Users</string>
+    <string name="room_occupants">Room Occupants</string>
+    <!-- /MAIN VIEW -->
+
+    <!-- PREFERENCES VIEW -->
+    <string name="Default">Default</string>
+    <string name="Save">Save</string>
+    <string name="xop.bind.interface">xop.bind.interface</string>
+    <string name="xop.domain">xop.domain</string>
+    <string name="xop.enable.app.logging">xop.enable.app.logging</string>
+    <string name="xop.enable.file.logging">xop.enable.file.logging</string>
+    <string name="xop.enable.gateway">xop.enable.gateway</string>
+    <string name="xop.enable.transport">xop.enable.transport</string>
+    <string name="xop.gateway.ping">xop.gateway.ping</string>
+    <string name="xop.gateway.port">xop.gateway.port</string>
+    <string name="xop.gateway.server">xop.gateway.server</string>
+    <string name="xop.hostname">xop.hostname</string>
+    <string name="xop.port">xop.port</string>
+    <string name="xop.onetoone.port">xop.onetoone.port</string>
+    <string name="xop.sds.disco.address">xop.sds.disco.address</string>
+    <string name="xop.sds.disco.interval">xop.sds.disco.interval</string>
+    <string name="xop.sds.disco.port">xop.sds.disco.port</string>
+    <string name="xop.sds.disco.timeout">xop.sds.disco.timeout</string>
+    <string name="xop.sds.indi.allow.duplicate">xop.sds.indi.allow.duplicate</string>
+    <string name="xop.sds.indi.allow.loopback">xop.sds.indi.allow.loopback</string>
+    <string name="xop.sds.indi.cqi">xop.sds.indi.cqi</string>
+    <string name="xop.sds.indi.numra">xop.sds.indi.numra</string>
+    <string name="xop.sds.indi.numscm">xop.sds.indi.numscm</string>
+    <string name="xop.sds.indi.port">xop.sds.indi.port</string>
+    <string name="xop.sds.indi.address">xop.sds.indi.address</string>
+    <string name="xop.sds.indi.rai">xop.sds.indi.rai</string>
+    <string name="xop.sds.indi.sci">xop.sds.indi.sci</string>
+    <string name="xop.sds.indi.ttl">xop.sds.indi.ttl</string>
+    <string name="xop.sds.service">xop.sds.service</string>
+    <string name="xop.ssl.password">xop.ssl.password</string>
+    <string name="xop.tls.auth">xop.tls.auth</string>
+
+    <string name="xop.transport.service">xop.transport.service</string>
+    <string name="xop.transport.interface">xop.transport.interface</string>
+
+    <string name="xop.transport.te.address">xop.transport.te.address</string>
+    <string name="xop.transport.te.persist.time">xop.transport.te.persist.time</string>
+    <string name="xop.transport.te.listenport">xop.transport.te.listenport</string>
+    <string name="xop.transport.te.port">xop.transport.te.port</string>
+    <string name="xop.transport.te.reliable">xop.transport.te.reliable</string>
+
+    <string name="xop.transport.address">xop.transport.address</string>
+    <string name="xop.transport.port">xop.transport.port</string>
+    <string name="xop.transport.grouprange">xop.transport.grouprange</string>
+
+    <string name="xop.gc.agent.address">xop.gc.agent.address</string>
+    <string name="xop.gc.agent.port">xop.gc.agent.port</string>
+    <string name="xop.gc.discovery.group">xop.gc.discovery.group</string>
+    <string name="xop.gc.rooms.safe">xop.gc.rooms.safe</string>
+    <string name="xop.gc.rooms.agreed">xop.gc.rooms.agreed</string>
+    <string name="xop.gc.rooms.ordered">xop.gc.rooms.ordered</string>
+    <string name="xop.gc.rooms.reliable">xop.gc.rooms.reliable</string>
+    <string name="xop.gc.rooms.besteffort">xop.gc.rooms.besteffort</string>
+    <!--
+xop.gc.agent.address=localhost
+#the port number used by the agent. The default is 56789.
+xop.gc.agent.port=56789
+#the group number that GCS will use for discovery messages. The default is 0.
+xop.gc.discovery.group=0
+
+#(default = empty)
+xop.gc.rooms.safe=
+#(default = empty)
+xop.gc.rooms.agreed=
+#(default = empty)
+xop.gc.rooms.ordered=
+#(default = empty)
+xop.gc.rooms.reliable=
+#(default = *)
+xop.gc.rooms.besteffort=
+    -->
+
+    <!-- /PREFERENCES VIEW -->
+
+    <!-- Preference Transport Fragment-->
+    <string name="blank_fragment">blank_fragment</string>
+
+    <!-- POPUP WINDOWS -->
+    <string name="ViewOccupants">View Occupants</string>
+    <!-- /POPUP WINDOWS -->
+
+    <!-- VERSION WINDOW -->
+    <string name="version_menu">Version</string>
+    <string name="about_version">Version: %s</string>
+    <string name="about_build">Build Date: %s</string>
+    <string name="group_name">Applied Informatics Group</string>
+    <string name="university_name">Drexel University</string>
+    <string name="title_activity_logger">LoggerActivity</string>
+    <string name="title_activity_xopmain">XOPMain</string>
+    <string name="title_activity_traffic_generator">TrafficGeneratorActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <!-- VERSION WINDOW -->
+
+    <!-- GCSDaemonService -->
+    <string name="gcsd_title">GCSD</string>
+    <string name="gcsd_message">GCSD Running</string>
+    <string name="gcsd_ticker_text">Running on $1 with ID $2</string>
+    <!-- GCSDaemonService -->
+
+    <!-- MGEN -->
+    <string name="startstop_mgen">Start MGEN</string>
+    <string name="mgen_port">56797</string>
+    <string name="mgen_port_label">MGEN Port</string>
+    <string name="mgen_ticker_text">MGEN running</string>
+    <string name="mgen_title">MGEN</string>
+    <string name="mgen_address">225.239.240.251</string>
+
+    <!-- Chat Traffic Gen -->
+    <string name="startstop_chat">Start Chat Traffic</string>
+    <string name="chatroom_label">room name:</string>
+    <string name="chatroom_text">agreed@conference.bcd</string>
+    <string name="chattraffic_ticker">Chat traffic generator running</string>
+    <string name="chattraffic_title">Chat Traffic Generator</string>
+    <string name="username_label">username</string>
+    <string name="username_text">chatgen</string>
+    <string name="password_label">password</string>
+    <string name="password_text">a</string>
+    <string name="server_label">server</string>
+    <string name="server_text">localhost</string>
+
+</resources>

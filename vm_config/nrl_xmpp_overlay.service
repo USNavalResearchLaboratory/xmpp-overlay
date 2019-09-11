@@ -1,0 +1,19 @@
+[Unit]
+After=network.target
+
+[Service]
+Type=simple
+User=xo
+Group=xo
+WorkingDirectory=/home/xo/xop
+ExecStart=/home/xo/xop/start_xop.sh -Dproperties.file=/home/xo/xop/config/vm.properties
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=NRLXO
+StandardOutput=file:/home/xo/logs/xop-out.log
+StandardError=file:/home/xo/logs/xop-err.log
+#LogLevelMax=info
+
+
+[Install]
+WantedBy=default.target

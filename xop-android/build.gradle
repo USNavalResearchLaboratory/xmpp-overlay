@@ -1,0 +1,47 @@
+apply plugin: 'com.android.application'
+
+repositories {
+    jcenter()
+}
+
+android {
+    signingConfigs {
+    }
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
+    defaultConfig {
+        applicationId 'mil.navy.nrl.xop.android'
+        minSdkVersion 26
+        targetSdkVersion 28
+        versionCode 1
+        versionName "0.10.0"
+        buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildTypes {
+        release {
+//            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors {
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'test-logging.properties'
+        exclude 'META-INF/jersey-module-version'
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':xop')
+    implementation project(':android-daemon-service')
+    // implementation project(':norm')
+}

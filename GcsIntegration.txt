@@ -1,0 +1,60 @@
+This version of XO is integrated with the TDIS Group Communication Service (GCS). XO can be configured to use GCS as the discovery service and as the transport service.
+
+==========
+New class:
+==========
+    com.boeing.rt.gcs.xop.GCSXoTransport - the transport service that uses GCS. This service is referenced by the TransportManager and the OneToOneTransportManager in the same manner as they use the Transport Engine. 
+
+=======================
+New/Modified libraries:
+=======================
+    gc-client.jar - the GCS java client library. This library is used by 
+    protosd.jar - this is a version of the protosd library that has been integrated with a Group Communications Discovery client.
+
+
+===================
+New XOP properties:
+===================
+  xop.sds.service - controls whether to use INDI ("protosd") or GCS ("groupcomms")for discovery. The default is "groupcomms". 
+
+  xop.transport.service - controls whether to use the Transport Engine ("transport-engine") or GCS ("groupcomms") for data dissemination. The default is "groupcomms"
+
+
+  xop.gc.agent.address - the address of the Group Communciations Agent (daemon). The default is "localhost"
+
+  xop.gc.agent.port - the port number used by the agent. The default is 56789.
+
+  xop.gc.discovery.group - the group number that GCS will use for discovery messages. The default is 0.
+
+
+  xop.gc.rooms.safe 	       	  (default = empty)
+  xop.gc.rooms.agreed	 	  (default = empty)
+  xop.gc.rooms.ordered	 	  (default = empty)
+  xop.gc.rooms.reliable	 	  (default = empty)
+  xop.gc.rooms.besteffort	  (default = *)
+   - These are properties that set the service class for individual chat rooms. Each is a list of chat room names that will be provided with that level of service, or '*' to catch all rooms that are not listed in properies for higher level services.  (High to low: safe, agreed, ordered, reliable, besteffort).
+   - For example, if the properties are set as:
+        xop.transport.gc.rooms.reliable=*
+   	xop.transport.gc.rooms.ordered=testroom, fiforoom
+	xop.transport.gc.rooms.agreed=causalroom
+     Then, all messages for chat room causalroom will be presented to chat members in agreed order, all messages to chat rooms testroom and fiforoom will be ordered per sender, while all messages to all other chat rooms will be given a reliable class of service.
+
+
+Renamed XOP properties:
+  Transport engine properties under xop.transport have been moved to xop.transport.te:
+  	    xop.transport.te.address
+  	    xop.transport.te.port
+  	    xop.transport.te.reliable
+  	    xop.transport.te.ordered
+  	    xop.transport.te.persist.time
+
+
+===========
+Running XOP
+===========
+In order to use GCS for discover or for transport service, the GCS Agent (daemon) needs to be running. To run the agent, 
+   gcsd -i <agent id> -f <configuration> 
+
+See https://pf.itd.nrl.navy.mil/svnroot/gcs/README for details on configuring GCS and on the run options. Note that the GCS port defined int he xop.properties must be consistent with the port defined in the GCS configuration file.
+
+Once the GCS Agent is running on a node, XO may be started. 

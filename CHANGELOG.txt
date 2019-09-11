@@ -3,6 +3,66 @@
 + : Feature addition
 * : Other / Refactoring
 ********************************************************************************
+
+[XOP 0.10.0]
+* Redesigned NORM Transport Service for XO
++ New Presence Transport using NORM Transport Service
+* Refactored ClientConnection to support Swift.im XMPP client
+* Refactored ClientManager to better abstract client connections
+* Scripts to deploy XOP to an Ubuntu VM
+* updated build system
+
+[XOP 0.9.4]
++ XO Gateway reconnect after not recieving ping messages for some configurable time
++ simple norm-transport option instead of Transport Engine, simple-transport, and GCS
+- Refinements to logout/login
+* updating README for current configuration and usage
+
+[XOP Branch 20170803_gcsdforeground, 0.9.3xAB17]
+* Refactor XO Gateway to support SPAWAR CWIX:
+  - accept self-signed certificates
+  - basic SSL support for dialback server-to-server connections
++ GCSD for roster list management (service discovery)
++ support for reliable transport and group communications classes in
+  android and linux versions
+- various bugfixes, refinements (e.g. ClientManager, RosterManager
+  refinements)
++ [in progress] Traffic Generator from XOP apk
+
+[XOP Branch AB14_sd_rewrite2]
+* Larger refactoring of XOP service discovery system. Removed
+  polling-based discovery mechanism. Removed DiscoverableClient as an
+  INDI advertisement. 
++ Very rudimentary gatewaying on linux 
++ Configurable bind multicast address for ProtoSD/INDI in Android and
+  Linux versions
++ one-to-one chat uses a dedicated multicast address and reliable
+  multicast using NORM.
+ 
+
+[XOP Branch AB14_Integration1]
++ preliminary reliable transport for MUC using Transport Engine
++ Android support
+* gatewayed MUC rooms untested
+
+
+[XOP 0.8.3]
++ supports gatewayed MUC rooms
++ supports video and voice chat
++ supports one-to-one messaging between remote clients
++ XOP works on Android
++ Clients can exchange datagrams using UDP directly
++ Each muc room can have different TransportEngine settings
++ new service discovery architecture that allows for a variety of SD implementations
++ Discovery, a UDP heartbeat service discovery implementation
++ Properties can be accessed using "XOP.PROPERTY" syntax
+- No longer uses the component architecture
+- No longer uses the packet filter architecture
+- IQManager doesn't spin off unnecessary threads
+* PacketRouter, RosterManager, PresenceManager, SDPresenceManager --consolidated--> ClientManager
+* Replaced MUC component with RoomManagers
+
+
 [XOP 0.8.1 2013-06-17]
 + have enterprise clients connected via XOG advertise presence and
 MUC occupants joins or leaves MUC rooms.
@@ -14,7 +74,6 @@ the enterprise client to his/her roster list.
 engine.
 * MUC component is no longer a jar component that is loaded by
 reflection-based autoloader.
-
 
 [XOP 0.8 2013-03-15]
  * XO no longer uses a config file by default.  You can generate one with the

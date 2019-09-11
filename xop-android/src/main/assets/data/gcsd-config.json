@@ -1,0 +1,79 @@
+{
+    "gcsd": {
+        "daemon": false,
+        "verbose": 0,
+
+        "client-interface": {
+            "transport": {
+                "protocol": "tcp",
+                "local-address": "0.0.0.0",
+                "local-port": 56789
+            }
+        },
+
+        "group-communication-agent": {
+	    "id": null,
+
+            "ttl": 64,
+            "multicast-interface": "eth0",
+            "use-unicast": false,
+
+            "membership": {
+                "transport": {
+                    "protocol": "udp",
+                    "group": "225.239.241.251",
+                    "port": 56789
+                },
+
+                "hello-interval": 1.0,
+                "dead-interval": 8.5,
+                "one-way-limit": 10,
+
+                "lead": {
+                    "proposal-ack-wait-time": 1.0,
+                    "proposal-tries": 4
+                },
+
+                "non-lead": {
+                    "proposal-wait-time": 1.0,
+                    "proposal-wait-tries": 3,
+
+                    "confirmation-wait-time": 2.0,
+                    "confirmation-wait-tries": 2
+                }
+            },
+
+            "unreliable-messaging": {
+                "transport": {
+                    "protocol": "udp",
+                    "group": "225.239.241.251",
+                  "port": 56789
+                }
+            },
+
+            "reliable-messaging": {
+                "outstanding-message-limit": 0,
+              "nack-delay-msec": 5000,
+              "nack-retry-delay-msec": 5000,
+
+                "transport": {
+                  "protocol": "norm",
+                  "group": "225.239.241.251",
+                  "port": 56797,
+                  "norm-parameters": {
+                    "debug-level": 0,
+                    "congestion-control-mode": "fixed",
+                    "transmit-rate": 64000.0,
+                    "transmit-segment-size": 1400,
+                    "transmit-block-size": 16,
+                    "transmit-num-parity": 4,
+                    "transmit-buffer-size": 1048576,
+                    "transmit-cache-limit": 512,
+                    "transmit-cache-size": 1048576,
+                    "receive-buffer-size": 1048576
+                  }
+                }
+            }
+        }
+    }
+}
