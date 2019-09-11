@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/xop-trunk"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/muc-trunk"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/tinder-1.2.2.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/smackx.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="output" path="build"/>
+</classpath>

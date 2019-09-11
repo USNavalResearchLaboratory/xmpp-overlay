@@ -1,0 +1,115 @@
+<html>
+<head>
+    <title>Create an mDNS Service</title>
+    <link rel="stylesheet" type="text/css" href="/css/protosd.css" />
+    <script type="text/javascript" src="/js/jquery-1.6.2.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            $('.sdsdetails').load('/ajax/sds/current');
+
+            $("#create-service-form").submit(function(event) {
+
+                /* stop form from submitting normally */
+                event.preventDefault();
+
+                var values = $('#create-service-form').serialize();
+
+                var currentid=1;
+
+                $.get("/ajax/sds/currentid", function(data){
+                    currentid= data;
+                });
+
+                url = "/api/services/"+ currentid + "/form";
+
+                /* Send the data using post and put the results in a div */
+                $.post( url, values,
+                        function( data ) {
+                            alert("Response was" + data);
+                        }
+                );
+            });
+
+        });
+    </script>
+
+</head>
+
+<body>
+
+<div class="header">
+    <div class="floatleft">
+        <a href="/index.html"><img src="/icons/dashboard.png"></a>
+    </div>
+
+    <div class="floatleft" style="padding: 14px;">
+        <div class="rounded headerbox" style="width:600px">
+            <h1>Create an mDNS Service</h1>
+            <p>Use the form below to provide the details of the new mDNS service that will be created in the service discovery
+                system labelled "<span style="color: indianred;" class="sdsdetails"></span>".</p>
+        </div>
+    </div>
+</div>
+
+<div class="clear"></div>
+
+<br>
+
+<form action="/" id="create-service-form">
+
+    <div style="margin:auto; width: 650px;">
+        <div class="rounded headerBox" style="height: 430px;">
+
+            <h2>New Service in <span class="sdsdetails"></span>:</h2>
+
+
+            <div class="row" style="float:left">
+                <label>Service Name</label>
+                <input style="width: 250px;" name="servicename" type="text" maxlength="50" />
+            </div>
+
+            <div class="row" style="float:right; ">
+                <label>Service Type</label>
+                <input style="width: 250px;" name="type" type="text" maxlength="50" />
+            </div>
+
+            <div class="row" style="float:left">
+                <label>Domain</label>
+                <input style="width: 250px;" name="domain" type="text" maxlength="50" />
+            </div>
+
+            <div class="row" style="float:right; ">
+                <label>Port</label>
+                <input style="width: 250px;" name="port" type="text" maxlength="50" />
+            </div>
+
+            <div class="row" style="float:left">
+                <label>Service Address</label>
+                <input style="width: 200px;" name="serviceaddress" value="localhost" type="text" maxlength="50" />
+            </div>
+
+            <div class="row" style="float:left">
+                <label>TXT (Format "key=value" "key2=another value")</label>
+                <textarea style="width: 580px; height: 50px;" name="txt" id="txt"></textarea>
+            </div>
+
+            <br>
+            <br>
+
+            <div class="row" style="float:right; ">
+                <input class="nicebutton" type="submit" name="submit" value="Create Service" /></div>
+
+            <div style="clear: both;"></div>
+        </div>
+    </div>
+
+</form>
+
+<br>
+<br>
+
+</body>
+</html>

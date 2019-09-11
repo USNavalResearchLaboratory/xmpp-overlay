@@ -1,0 +1,151 @@
+
+<project name="ServerToServer" default="dist" basedir=".">
+	<description>S2S Plugin for XOP</description>
+	<property name="build" location="build" />
+	<property name="lib" location="lib" />
+	<property name="dist" location="dist" />
+	<property name="src" location="src" />
+	<property name="docs" location="docs" />
+	<property name="xop_dir" location="../../" />
+	<property name="xop_build_dir" location="${xop_dir}/build" />
+	<property name="configs" location="config" />
+	<property name="plugins" location="plugins" />
+	<property name="jar.name" value="s2s.jar" />
+
+
+	<path id="project.classpath">
+        <!--	<fileset dir="${lib}" id="jars">
+			<include name="*.jar" />
+        </fileset> -->
+      <fileset dir="${xop_dir}/lib" id="xop.jars">
+         <include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${xop_dir}/dist/" id="xop_jars">
+			<include name="xop.jar" />
+		</fileset>
+		<filelist>
+			<file name="${jar.name}" />
+		</filelist>
+	</path>
+
+
+	<!-- =================================
+		target: init
+	 ================================= -->
+	<target name="init">
+		<mkdir dir="${build}" />
+		<mkdir dir="${dist}" />
+		<!--<mkdir dir="${docs}" />-->
+	</target>
+
+	<target name="deps" />
+
+	<!-- ================================= 
+        	 target: compile              
+         ================================= -->
+	<target name="compile" depends="init,deps" description="--> compile the source for the plugin">
+		<javac srcdir="${src}" destdir="${build}" includeantruntime="false" debug="on">
+			<compilerarg value="-Xlint:unchecked" />
+			<classpath refid="project.classpath" />
+			<src path="${src}" />
+		</javac>
+	</target>
+
+	<!-- ================================= 
+          target: dist      
+         ================================= -->
+	<target name="dist" depends="compile" description="generate the distribution jar">
+		<!-- Convert project class path to string property for the manifest file -->
+		<pathconvert property="mf.classpath-xop" pathsep=" ">
+			<chainedmapper>
+				<!-- Remove absolute path -->
+				<flattenmapper />
+				<!-- add lib/ prefix -->
+				<globmapper from="*" to="../../lib/*" />
+			</chainedmapper>
+			<path>
+				<fileset dir="${xop_dir}/dist/" id="xop_jars">
+					<include name="lib/*.jar" />
+				</fileset>
+			</path>
+		</pathconvert>
+
+
+		<jar basedir="." destfile="${dist}/${jar.name}" update="true">
+			<include name="src/**/*.java" />
+			<include name="docs/**/*" />
+
+			<fileset dir="${build}">
+				<include name="**/*.class" />
+				<include name="**/*.xml" />
+			</fileset>
+			<!--<filelist id="component" dir="src" files="component.xml" />-->
+			<manifest>
+				<attribute name="Created-By" value="${creator}" />
+				<attribute name="Class-Path" value="${mf.classpath-component}" />
+			</manifest>
+		</jar>
+
+		<!-- Copy libs, configs, and plugins to dist dir  (not used?!)
+        <copy todir="${dist}/lib">
+            <fileset dir="${lib}"/>
+		</copy>-->
+	</target>
+
+	<!-- =================================
+			target: deploy
+	     ================================= -->
+	<target name="deploy" depends="dist" description="deploy the plugin (jar
+		and class)">
+		<echo>Deploying S2S</echo>
+
+		<!-- copy the jar files -->
+		<mkdir dir="${xop_dir}/dist/plugins" />
+		<mkdir dir="${xop_dir}/dist/plugins/lib" />
+        <!--
+		<copy todir="${xop_dir}/dist/plugins/lib">
+			<fileset dir="${lib}" />
+		</copy>
+        -->
+		<copy file="${dist}/${jar.name}" todir="${xop_dir}/plugins" />
+		<copy file="${dist}/${jar.name}" todir="${xop_dir}/dist/plugins" />
+
+		<!-- copy the class files 
+        <copy todir="${xop_build_dir}">
+            <fileset dir="${build}" />
+        </copy>-->
+	</target>
+
+	<!-- =================================
+			target: undeploy
+	     ================================= -->
+	<target name="undeploy" description="undeploy the plugin">
+		<delete file="${xop_dir}/dist/plugins/${jar.name}" />
+		<delete file="${xop_dir}/plugins/${jar.name}" />
+		<delete dir="${xop_dir}/dist/plugins/lib" />
+		<delete dir="${xop_dir}/plugins/lib" />
+	</target>
+
+	<!-- =================================
+			target: redeploy
+	     ================================= -->
+	<target name="redeploy" depends="undeploy, deploy" description="redeploy the plugin">
+	</target>
+	<!-- =================================
+			target: clean
+	     ================================= -->
+	<target name="clean" depends="undeploy" description="Delete dist directory.">
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+		<delete dir="${docs}/javadoc" />
+	</target>
+
+	<!-- =================================
+			target: javadoc  
+	     ================================= -->
+	<target name="javadoc" depends="init" description="creates javadocs">
+		<javadoc packagenames="edu.*" sourcepath="${src}" excludepackagenames="examples.*" destdir="${docs}/javadoc" classpathref="project.classpath" />
+	</target>
+
+
+</project>

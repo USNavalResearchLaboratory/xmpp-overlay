@@ -1,0 +1,82 @@
+#
+# Mostly taken from the default logging properties file
+#
+
+# Default global logging level 
+.level=INFO
+# ----------------------------
+# XOP uses the ConsoleHandler as the default handler to print to std err.
+handlers=java.util.logging.ConsoleHandler
+
+## --- ConsoleHandler ---
+# dnguyen 2012-04-16: the ConsoleHandler should be kept at the FINEST logging level. 
+# The log level used by the Logger will be set by the logger, log level.
+# For example, edu.drexel.xop.core.ClientProxy.level=FINE will log FINE level 
+# messages even though the ConsoleHandler will output FINEST level. 
+# Do not change this logging level.
+java.util.logging.ConsoleHandler.level=FINEST
+# This formatter puts log messages on one line, timestamp (YYYYMMdd-hhmmss), thread (e.g. "t: 10"), class and method 
+java.util.logging.ConsoleHandler.formatter=edu.drexel.xop.util.logger.DefaultFormatter
+
+
+# --- FileHandler ---
+# Log everything, rotate between 3 files, simple formatting
+java.util.logging.FileHandler.level=FINEST
+java.util.logging.FileHandler.pattern=xop.log
+java.util.logging.FileHandler.limit=4096
+java.util.logging.FileHandler.count=10
+java.util.logging.FileHandler.formatter=edu.drexel.xop.util.logger.DefaultFormatter
+
+
+# Specify package level logging here if necessary
+# eg: edu.drexel.xop.core=ALL
+# ----------------------------
+javax.jmdns.level=OFF
+javax.jmdns.impl.level=OFF
+javax.jmdns.impl.JmDNSImpl.level=OFF
+javax.jmdns.impl.SocketListener.level=OFF
+mil.navy.nrl.level=WARNING
+mil.navy.nrl.protosd.api.NRLServiceDiscovery.level=INFO
+mil.navy.nrl.protosd.api.imp.indi.INDIDiscovery.level=INFO
+
+edu.drexel.xop.net.level=WARNING
+edu.drexel.xop.net.discovery.level=WARNING
+edu.drexel.xop.net.discovery.SDInstance.level=WARNING
+#edu.drexel.xop.net.gump.level=INFO
+#edu.drexel.xop.s2s.level=FINE
+
+#edu.drexel.xop.client.AbstractClientConnection.level=WARNING
+#edu.drexel.xop.client.XMLLightweightParser.level=WARNING
+#edu.drexel.xop.client.ClientAuthenticator.level=WARNING
+#edu.drexel.xop.client.ClientManager.level=FINE
+#edu.drexel.xop.client.StanzaUnmarshaller.level=WARNING
+#
+#
+#edu.drexel.xop.component.level=INFO
+#edu.drexel.xop.component.ComponentManager.level=INFO
+#
+#edu.drexel.xop.component.ad.ADComponent.level=WARNING
+#
+#edu.drexel.xop.component.level=INFO
+#edu.drexel.xop.component.ComponentManager.level=INFO
+#
+#edu.drexel.xop.core.ClientProxy.level=FINE
+#
+#edu.drexel.xop.iq.BindIqHandler.level=WARNING
+#
+#edu.drexel.xop.net.level=INFO
+#edu.drexel.xop.net.discovery.level=FINE
+#edu.drexel.xop.net.discovery.SDInstance.level=FINE
+##edu.drexel.xop.net.gump.level=INFO
+#
+#edu.drexel.xop.net.gump.GumpXopProxy.level=INFO
+#edu.drexel.xop.net.discovery.SDObject.level=INFO
+#edu.drexel.xop.presence.PresenceManager.level=INFO
+#edu.drexel.xop.web.WebServer.level=FINE
+#edu.drexel.xop.web.Connection.level=FINE
+#edu.drexel.xop.component.xog.level=FINE
+#edu.drexel.xop.component.s2s.level=FINE
+#edu.drexel.xop.router.PacketRouter.level=FINER
+#edu.drexel.xop.component.muc.MucRoom.level=FINE
+#edu.drexel.xop.component.xog.BridgedRoom.level=FINE
+#edu.drexel.xop.component.persistence.PersistenceListener.level=FINE

@@ -1,0 +1,54 @@
+.graphite .dd-wrapper {background: #343434; color: #fff; font: bold 12px Arial, sans-serif; border-top: 1px solid #111; border-right: 1px solid #111; border-left: 1px solid #111;}
+.graphite .dd-menu {border-top: 1px solid #111;}
+.graphite .dd-menu a {text-decoration: none; padding: 4px 4px 4px 40px; display: block; color: #ddd; border-bottom: 1px solid #222; border-top: 1px solid #555; position: relative;}
+.graphite .dd-menu a:hover {background: #232323; color: #fff;}
+.graphite .dd-menu li a .dd-icon {position: absolute; top: 50%; left: 10px; width: 34px; margin-top: -8px; height: 22px; background: url(../images/arrow_black_right.png) no-repeat 0 center;}
+.graphite .dd-menu li.dd-parent a.dd-parent-a {background: #0C0C0C url(../images/bg_black.png) repeat-x center center;}
+.graphite .dd-menu li.dd-parent a:hover {background: #0C0C0C url(../images/bg_black_on.png) repeat-x center center;}
+.graphite .dd-menu li.dd-parent a.active .dd-icon {background: url(../images/arrow_black_down.png) no-repeat 0 center;}
+.graphite .dd-menu li.dd-parent a.active {color: #fff; background: #111;}
+.graphite .dd-header {font: normal 11px Arial, sans-serif;}
+.graphite .dd-header ul {width: 100%; overflow: hidden; line-height: 1.5em; padding: 5px 10px;}
+.graphite .dd-header li {display: inline;}
+.graphite .dd-header li a {text-decoration: none; float: left; display: block; padding: 1px 15px 1px 5px; background: url(../images/arrow_white_right.png) no-repeat 100% center; color: #fff;}
+.graphite .dd-header li a:hover {color: #fff; text-decoration: underline;}
+.graphite .dd-header a.link-back {text-decoration: none; display: block; padding: 5px 10px 0 20px; background: url(../images/arrow_white_left.png) no-repeat 5px center; color: #fff;}
+.graphite .dd-header h3 {clear: both; padding: 5px 10px; margin: 0; font-size: 1.1em;}
+.graphite .dd-header h3 .dd-count {display: none;}
+
+
+.graphitel .dd-wrapper {background: #343434; color: #fff; font: bold 16px Arial, sans-serif; border-top: 1px solid #111; border-right: 1px solid #111; border-left: 1px solid #111;}
+.graphitel .dd-menu {border-top: 1px solid #111;}
+.graphitel .dd-menu a {text-decoration: none; padding: 4px 4px 4px 40px; display: block; color: #ddd; border-bottom: 1px solid #222; border-top: 1px solid #555; position: relative;}
+.graphitel .dd-menu a:hover {background: #232323; color: #fff;}
+.graphitel .dd-menu li a .dd-icon {position: absolute; top: 50%; left: 10px; width: 34px; margin-top: -8px; height: 22px; background: url(../images/arrow_black_right.png) no-repeat 0 center;}
+.graphitel .dd-menu li.dd-parent a.dd-parent-a {background: #0C0C0C url(../images/bg_black.png) repeat-x center center;}
+.graphitel .dd-menu li.dd-parent a:hover {background: #0C0C0C url(../images/bg_black_on.png) repeat-x center center;}
+.graphitel .dd-menu li.dd-parent a.active .dd-icon {background: url(../images/arrow_black_down.png) no-repeat 0 center;}
+.graphitel .dd-menu li.dd-parent a.active {color: #fff; background: #111;}
+.graphitel .dd-header {font: normal 24px Arial, sans-serif;}
+.graphitel .dd-header ul {width: 100%; overflow: hidden; line-height: 1.5em; padding: 5px 10px;}
+.graphitel .dd-header li {display: inline;}
+.graphitel .dd-header li a {text-decoration: none; float: left; display: block; padding: 1px 15px 1px 5px; background: url(../images/arrow_white_right.png) no-repeat 100% center; color: #fff;}
+.graphitel .dd-header li a:hover {color: #fff; text-decoration: underline;}
+.graphitel .dd-header a.link-back {text-decoration: none; display: block; padding: 5px 10px 0 20px; background: url(../images/arrow_white_left.png) no-repeat 5px center; color: #fff;}
+.graphitel .dd-header h3 {clear: both; padding: 5px 10px; margin: 0; font-size: 1.3em;}
+.graphitel .dd-header h3 .dd-count {display: none;}
+
+#scroller_container {
+ position: relative;
+ width: 500px;
+ height: 200px;
+ overflow: hidden;
+ text-align: center;
+}
+
+#scroller {
+ white-space: nowrap;
+ line-height: 30px;
+ font-size: 28px;
+}
+
+#scroller p {
+ padding: 0;
+}

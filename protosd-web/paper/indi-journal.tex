@@ -1,0 +1,184 @@
+
+%%
+%% Copyright 2007, 2008, 2009 Elsevier Ltd
+%%
+%% This file is part of the 'Elsarticle Bundle'.
+%% ---------------------------------------------
+%%
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.2 of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.2 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%%
+%% The list of all files belonging to the 'Elsarticle Bundle' is
+%% given in the file `manifest.txt'.
+%%
+
+%% Template article for Elsevier's document class `elsarticle'
+%% with numbered style bibliographic references
+%% SP 2008/03/01
+%%
+%%
+%%
+%% $Id: elsarticle-template-num.tex 4 2009-10-24 08:22:58Z rishi $
+%%
+%%
+\documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+%% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+%% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+%% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+
+%% if you use PostScript figures in your article
+%% use the graphics package for simple commands
+%% \usepackage{graphics}
+%% or use the graphicx package for more complicated commands
+%% \usepackage{graphicx}
+%% or use the epsfig package if you prefer to use the old commands
+%% \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers after \end{frontmatter}.
+%% \usepackage{lineno}
+
+%% natbib.sty is loaded by default. However, natbib options can be
+%% provided with \biboptions{...} command. Following options are
+%% valid:
+
+%%   round  -  round parentheses are used (default)
+%%   square -  square brackets are used   [option]
+%%   curly  -  curly braces are used      {option}
+%%   angle  -  angle brackets are used    <option>
+%%   semicolon  -  multiple citations separated by semi-colon
+%%   colon  - same as semicolon, an earlier confusion
+%%   comma  -  separated by comma
+%%   numbers-  selects numerical citations
+%%   super  -  numerical citations as superscripts
+%%   sort   -  sorts multiple citations according to order in ref. list
+%%   sort&compress   -  like sort, but also compresses numerical citations
+%%   compress - compresses without sorting
+%%
+%% \biboptions{comma,round}
+
+% \biboptions{}
+
+\usepackage{subfigure}
+\usepackage{wrapfig}
+
+\providecommand{\abs}[1]{\vert#1\vert}
+
+\journal{Future Generation Computer Systems}
+
+% For defining whether this is a paper or a report... 
+\newcommand{\doctype}{paper} 
+   
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for the associated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for the associated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for the associated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%%
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \address{Address\fnref{label3}}
+%% \fntext[label3]{}
+
+%\title{The mDNS Compatible INDI Service Discovery System}
+\title{DNS Messaging for Service Discovery in Infrastructureless Mobile Networks}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{<author name>}
+%% \address[label1]{<address>}
+%% \address[label2]{<address>}
+
+\author[nrl]{Joe Macker}
+
+\author[cu]{Ian Taylor}
+
+\address[nrl]{Naval Research Lab, Washington DC, USA}
+\address[cu]{School of Computer Science, Cardiff University, Cardiff, UK}
+
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+\begin{keyword} mDNS \sep JmDNS \sep Peer-to-Peer \sep Multicast \sep Service Discovery \end{keyword}
+
+%% keywords here, in the form: keyword \sep keyword
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{frontmatter}
+
+\section{Introduction} 
+\label{sec:introduction} 
+\input{introduction}
+
+The rest of the \doctype~is organized as follows. The next section provides some background into existing efforts for service discovery in a MANET context. Section \ref{sec:indi} discusses INDI in depth, providing a requirements analysis, architecture, design,  and implementation for the mDNS based discovery system.  Section \ref{sec:core} gives the background for the experiment and discusses the CORE emulation environment that we used for the experiments.  In Section \ref{sec:protosd}, we discuss the application environment we use to deploy INDI and give some examples of applications we have used it for.  The methodology for the experimental is summarized in Section \ref{sec:methodology}, which provides  an explanation of the distributed entities, the tools used and the rational for the metrics.  Finally, in Section \ref{sec:results}, we give the results from the experiment, providing a detail overview of overhead rates for each protocol, latencies and success rates that satisfy the quality of service metric defined in Section \ref{sec:methodology}. The \doctype~is concluded in Section \ref{sec:conclusions}  
+
+\section{Background}
+\label{sec:background}
+\input{background}
+
+\section{INDI}
+\label{sec:indi}
+\input{indi}
+
+\section{Experiment Background and Emulation Environment}
+\label{sec:core}
+\input{core}
+
+\section{Service Visualization}
+\label{sec:protosd}
+\input{protosd}
+
+\section{Experiment Methodology}
+\label{sec:methodology}
+\input{methodology}
+
+\section{Experimental Results}
+\label{sec:results}
+\input{results}
+
+\input{conclusion}
+
+\input{acknowledgements}
+
+
+\bibliographystyle{elsarticle-num}
+
+\bibliography{fgcsbibs}
+
+\end{document}
+

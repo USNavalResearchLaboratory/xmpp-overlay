@@ -1,0 +1,36 @@
+**********************Changelog: Transport Engine (TE)***********************
+- : Bug Fix
++ : Feature addition
+* : Other / Refactoring
+*****************************************************************************
+[TE 0.4 06.18.2013]
+ + Added property to clear content store non-volatile database on startup.
+ + Added property for content store in-memory cache limit.
+ + Added basic NORM object transport protocol.
+ - Stats manager now monitors traffic correctly.
+
+[ TE 0.3    03.08.2013 ] ****************************************************
+ + Persistent messages are now cached in memory as well as in non-volatile 
+   storage.
+ + Created simple chat demo scripts.
+ - Fixed daemon bug which prohibited multiple TE instances running in CORE.
+ - Error thrown rather than crash when no default route is set.
+ - TTL and duplicate detection now work for UDP.
+ * Sockets for transport protocols are now created lazily rather that at 
+   startup.
+ * Versioned messages now work correctly within persistence algorithms.
+ * Various Trickle tweaks.
+
+[ TE 0.2    02.13.2013 ] ****************************************************
+ + Configuration can be specified with a configuration file.
+ + Added a TE startup script.
+ - PTP agents now properly receive messages from remote instances.
+ - Client handler updated to be thread-safe.
+ * Clients must now subscribe to a destination before sending to it.
+ * Logging classes refactored.
+ * Created javadocs for entire source tree.
+ * Trickle performance tweaks.
+ * JSAP added to parse command line arguments.
+
+[ TE 0.1    01.22.2013 ] ****************************************************
+ * Initial release

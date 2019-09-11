@@ -1,0 +1,181 @@
+Transport Engine API Documentation
+Updated: May 30, 2013
+--------------------------------------------
+
+============================================
+1 OVERVIEW
+============================================
+The Transport Engine (TE) provides a TCP-based JSON API for external processes.
+Each message to the TE is sent via a TCP socket formatted as follows:
+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                           msg_length                          |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                              json                             | 
+    |                              ...                              |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+The "msg_length" is a 32-bit integer equal to the length of the JSON message
+"json" and "msg_length" (4) in bytes.  
+
+============================================
+2 JSON Message Formats
+============================================
+
+--------------------------------------------
+2.1 APPLICATION TO TRANSPORT ENGINE MESSAGES
+--------------------------------------------
+
+All JSON messages to the TE must be wrapped as follows:
+
+{
+    "command" : "COMMAND_NAME",
+    "args" : { COMMAND_ARGS }
+}
+
+The values for COMMAND_NAME are listed below along with the valid arguments for
+each.  All arguments are required unless otherwise noted:
+
+1) Command: "send"
+   Description: Sends a message to be transported by the TE.
+   Arguments:
+        - "id" (string) : A locally unique identifier string for the message.
+        - "destination" (string) : A destination for the message.
+        - "payload" (byte array) : Payload of the message.
+   Example: 
+        {
+            "command" : "send",
+            "args" : { 
+                "id" : "1",
+                "destination" : "testchannel",
+                "payload" : "this is my message"
+            }
+        }
+
+2) Command: "subscription"
+   Description: Subscribes or unsubscribes to an address.
+   Arguments:
+        - "destination" (string) : Destination to subscribe from or subscribe
+        to.
+        - "subscribe" (boolean string) : Set to "true" to subscribe, or "false"
+        to unsubscribe.
+   Example: 
+        {
+            "command" : "subscription",
+            "args" : {
+                "destination" : "testchannel",
+                "subscribe" : "true"
+            }
+        }
+
+3) Command: "set-properties"
+   Description: Sets the transport properties for the connection to the TE.
+   Arguments: 
+        - "reliable" (boolean string) : Set to "true" to mark further messages
+        as reliable, or "false" for unreliable.
+        - "persistent" (integer) : Set to 0 for non-persistent, or the UNIX
+        timestamp to which the message should be persisted.
+        - "ordered" (boolean string) : Set to "true" to mark further messages as
+        ordered, or "false" for unordered.
+   Example:
+        {
+            "command" : "set-properties",
+            "args" : {
+                "reliable" : "true",
+                "persistent" : 0
+                "ordered" : "false"
+            }
+        }
+
+
+4) Command: "end-session:
+   Description: Gracefully ends the connection to the TE.
+   Arguments: 
+        None
+   Example:
+        {
+            "command" : "end-session"
+        }
+
+5) Type: "shutdown"
+   Description: Shuts down the TE instance.  This will disconnect all other
+   connected clients, and should generally only be used for testing.
+   Info:
+        None
+   Example:
+        {
+            "type" : "shutdown"
+        }
+
+--------------------------------------------
+2.2 TRANSPORT ENGINE TO APPLICATION MESSAGES
+--------------------------------------------
+
+Messages from the Transport Engine to an application follow the same packet
+format as detailed in Section 1.  The JSON messages all follow the format:
+
+{
+    "type" : "MESSAGE_TYPE",
+    "info" : "MESSAGE_INFO"
+}
+
+The values for MESSAGE_TYPE are listed below along with their respective
+arguments (MESSAGE_INFO values).
+
+1) Type: "error"
+   Description: Indicates there was an error in the API connection.
+   Info: A string indicating what error occurred.
+   Example:
+        {
+            "type" : "error",
+            "info" : "Unable to handle API command."
+        }
+
+2) Type: "message"
+   Description: Indicates a new message bound for a destination to which the
+   application is subscribed was received.
+   Info:
+        - "src-engine" (string) : The GUID of the source Transport Engine.
+        - "src-client" (string) : The UID of the source client connected to
+        "src-engine".
+        - "id" (string) : ID of the message.
+        - "dest" (string) : The destination of the message.
+        - "version" (integer) : The version of the message.
+        - "payload" (byte array) : The payload of the message.
+    Example:
+        {
+            "type" : "message",
+            "info" : {
+                "src-engine" : "123",
+                "src-client" : "5",
+                "id" : "purple123",
+                "version" : 2,
+                "payload" : "the message that was sent"
+            }
+        }
+
+3) Type: "end-session"
+   Description: Indicates the API session was closed gracefully.
+   Info:
+        None
+   Example:
+        {
+            "type" : "end-session"
+        }
+
+============================================
+2 API Usage
+============================================
+
+* Upon establishing a connection to the TE API, the application should initially
+send a "set-properties" message.  If the properties are not sent, the TE will
+not allow messages to be sent, and the application will receive an "error"
+message in response.
+
+* To send to a destination, the application must first subscribe to that
+destination.  This is not done automatically.
+
+* If a session is not gracefully closed, there is no guarantee the application
+will receive an "end-session" message.

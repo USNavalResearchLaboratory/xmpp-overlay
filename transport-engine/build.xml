@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="TransportEngine" default="dist" basedir=".">
+    <description>Builds, tests, and runs the project TransportEngine.</description>
+    <property name="src" location="src" />
+    <property name="lib" location="lib" />
+    <property name="docs" location="docs" />
+    <property name="bin" location="bin" />
+    <property name="dist"  location="dist" />
+    <property name="bin-api" location="bin-api" />
+    <property name="deploy.dir" value="/coreapps/transport-engine" />
+
+
+    <path id="master-classpath">
+        <fileset dir="${lib}">
+            <include name="*.jar" />
+        </fileset>
+    </path>
+
+    <!-- Targets to initialize and cleanup -->
+    <target name="init">
+        <mkdir dir="${bin}" />
+        <mkdir dir="${docs}" />
+        <mkdir dir="${bin-api}" />
+    </target>
+
+    <target name="clean">
+        <delete dir="${bin}" />
+        <delete dir="${dist}" />
+        <delete dir="${bin-api}" />
+        <delete dir="${docs}/javadoc" />
+        <delete file="apis/java/TransportEngineAPI.jar" />
+    </target>
+
+    <!-- Targets for the TransportEngine core -->
+    <target name="compile" depends="init">
+        <javac srcdir="${src}" destdir="${bin}" includeantruntime="false" debug="true">
+            <classpath refid="master-classpath" />
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile">
+        <mkdir dir="${dist}" />
+        <jar jarfile="${dist}/TransportEngine.jar" basedir="${bin}">
+            <manifest>
+                <attribute name="Main-Class" value="edu.drexel.transportengine.core.Run" />
+            </manifest>
+        </jar>
+        <antcall target="dist-api" />
+    </target>
+
+	<target name="javadoc" depends="init">
+		<javadoc packagenames="edu.*" sourcepath="${src}" destdir="${docs}/javadoc" />
+	</target>
+
+    <target name="deploy" depends="dist" description="Deploys the built Transport Engine to the dir: ${deploy.dir}">
+        <echo>deploying the contents of ${dist} to ${deploy.dir}</echo>
+        <copy todir="${deploy.dir}/lib">
+            <fileset dir="${lib}" />
+        </copy>
+        <copy todir="${deploy.dir}/dist">
+            <fileset dir="${dist}" />
+        </copy>
+        <copy todir="${deploy.dir}" file="te-daemon.sh" />
+        <chmod perm="a+x" type="file" dir="${deploy.dir}" includes="*.sh" excludes="**/*.jar **/*.xml" />
+    </target>
+
+    <!-- Targets for the TransportEngine API -->
+    <target name="compile-api" depends="init">
+        <javac srcdir="${src}/edu/drexel/transportengine/api" destdir="${bin-api}" includeantruntime="false" debug="true">
+            <classpath refid="master-classpath" />
+        </javac>
+    </target>
+
+    <target name="dist-api" depends="compile-api">
+        <mkdir dir="${dist}" />
+        <jar jarfile="${dist}/TransportEngineAPI.jar" basedir="${bin-api}" />
+        <copy file="${dist}/TransportEngineAPI.jar" tofile="apis/java/TransportEngineAPI.jar" /> 
+    </target>
+</project>

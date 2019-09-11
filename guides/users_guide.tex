@@ -1,0 +1,340 @@
+\documentclass[draft]{article}
+
+\usepackage{hyperref}
+\usepackage{todonotes}
+\usepackage{placeins}
+\title{XO Users' Guide}
+\date{\today}
+\author{Trevor Adams, Robert Lass, and David Millar}
+
+\begin{document}
+\maketitle
+
+
+\section{Introduction}
+XOP (Xmpp Overlay Proxy) is a proxy for XMPP clients that provides a distributed
+messaging environment for MANETs.  It is essentially a light-weight
+XMPP server that supports components to extend its functionality.  XMUM for example
+is a plugin that provides distributed group chat for users of a network that has
+been tailored for MANET environments.
+
+
+\section{Obtaining XOP}
+There are two ways to obtain XOP: one is to build it from source the other is to download a binary distribution.
+\subsection{Binary Distribution}
+
+Binary distributions can be obtained from: \todo{Location here}
+
+\subsection{Source}
+XOP is hosted at the Naval Research Lab's (NRL) proteanforge repository, located at
+\url{https://pf.itd.nrl.navy.mil/svnroot/groupwise/xop/trunk}. In order to obtain
+a copy of the XOP source, you will need to check it out with an svn client as in
+Figure~\ref{fig:svn-export-output}.
+
+\begin{figure}
+\begin{verbatim}
+$svn export https://pf.itd.nrl.navy.mil/svnroot/groupwise/xop/trunk
+A    trunk
+A    trunk/test
+A    trunk/test/TestSample.java
+A    trunk/test/edu
+A    trunk/test/edu/drexel
+A    trunk/test/edu/drexel/xop
+A    trunk/test/edu/drexel/xop/core
+A    trunk/test/edu/drexel/xop/core/TestClientProxy.java
+A    trunk/test/edu/drexel/xop/core/TestJidPacketFilter.java
+...
+A    trunk/docs
+A    trunk/docs/CHANGELOG.TXT
+A    trunk/xmpp_samples
+A    trunk/xmpp_samples/example_stanzas
+A    trunk/xmpp_samples/example_stanzas/Spark Joins Openfire Muc.xml
+A    trunk/xmpp_samples/example_stanzas/XMPP MUC Operations Condensed.xml
+A    trunk/xmpp_samples/example_stanzas/openfire spark login.xml.xml
+A    trunk/xmpp_samples/example_stanzas/XMPP MUC Operations.xml
+A    trunk/build.xml
+Exported revision 329.
+\end{verbatim}
+\caption{Example output from exporting XOP}
+\label{fig:svn-export-output}
+\end{figure}
+
+This will check out the latest trunk version of the XOP source and related
+artifacts.
+
+
+\subsubsection{Creating a Build}
+XOP comes bundled with an ant config file that specifies a number of targets.
+In order to build a XOP distribution, simply run \textbf{ant dist} as seen
+in Figure~\ref{fig:ant-build}. After this, a dist folder will be created
+that contains the XOP distribution.
+
+\begin{figure}
+\begin{verbatim}
+$ant dist
+Buildfile: C:\Users\Dave\code\xop\trunk\build.xml
+
+init:
+    [mkdir] Created dir: C:\Users\Dave\code\xop\trunk\build
+    [mkdir] Created dir: C:\Users\Dave\code\xop\trunk\dist
+
+compile:
+    [javac] Compiling 80 source files to C:\Users\Dave\code\xop\trunk\build
+
+javadoc:
+  [javadoc] Generating Javadoc
+  [javadoc] Javadoc execution
+  [javadoc] Creating destination directory: "C:\Users\Dave\code\xop\trunk\docs\javadoc\"
+  [javadoc] Loading source files for package edu.drexel.xop...
+  ...
+
+jar:
+      [jar] Building jar: C:\Users\Dave\code\xop\trunk\dist\xop.jar
+
+test-compile:
+    [javac] Compiling 12 source files
+
+test:
+     [echo] ${test.classpath}
+    [junit] Running edu.drexel.xop.util.TestThreadedPacketDeliveryQueuePacketListener
+    [junit] Testsuite: edu.drexel.xop.util.TestThreadedPacketDeliveryQueuePacketListener
+    [junit] Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 0 sec
+    [junit] Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 0 sec
+    ...
+
+guides:
+     [move] Moving 2 files to C:\Users\Dave\code\xop\trunk\docs
+
+dist:
+     [copy] Copying 15 files to C:\User\Dave\code\xop\runk\dist\lib
+     [copy] Copying 2 files to C:\Users\Dave\code\xop\trunk\dist\config
+     [copy] Copying 1 file to C:\Users\Dave\code\xop\trunk\dist\plugins
+     [copy] Copying 137 files to C:\Users\Dave\code\xop\trunk\dist\docs
+
+BUILD SUCCESSFUL
+Total time: 6 seconds
+\end{verbatim}
+\caption{Example ant build}
+\label{fig:ant-build}
+\end{figure}
+
+This creates a new directory called dist in the current directory.
+This directory contains the executable code, configuration files,
+and documentation for your XOP distribution.
+
+To clean up a XOP distribution, run \textbf{ant clean} as in Figure~\ref{fig:ant-clean}
+
+\begin{figure}
+\begin{verbatim}
+$ant clean
+Buildfile: C:\Users\Dave\code\xop\trunk\build.xml
+
+clean-test:
+
+clean:
+   [delete] Deleting directory C:\Users\Dave\code\xop\trunk\build
+   [delete] Deleting directory C:\Users\Dave\code\xop\trunk\dist
+   [delete] Deleting directory C:\Users\Dave\code\xop\trunk\docs\javadoc
+
+BUILD SUCCESSFUL
+Total time: 0 seconds
+\end{verbatim}
+\caption{Cleaning up a build}
+\label{fig:ant-clean}
+\end{figure}
+
+This will remove everything that was created by running \textbf{ant dist},
+effectively restoring things to the way they were when XOP was exported.
+
+\FloatBarrier
+\section{Configuration}
+There are two primary ways that a user can configure XOP.  One is by modifying
+the xop properties file.  The other way is to add and remove components.
+
+\subsection{XOP Properties}
+Once a build is created, a user can modify the XOP properties file to change its
+behavior.  The properties file is located in \texttt{dist/config/xopProps.xml}. 
+Note if you wish for the configuration to persist over builds, edit \texttt{config/xopProps.xml} instead.
+It is a set of name-value pairs that determine how a particular behavior of XOP
+works.
+
+An example properties file is shown in Figure~\ref{fig:sample-config-file}.
+\subsubsection{\texttt{xop.*}}
+\paragraph{\texttt{xop.debug}}
+Client connection debugging, logs the client packet information to \texttt{/tmp/tcp-\$UUID}
+
+Default: true
+\paragraph{\texttt{xop.domain}}
+Which domain should XOP use for its base (eg: bob@DOMAIN)
+
+Default: proxy
+\paragraph{\texttt{xop.device}}
+Which device (eth0/eth1) should XOP use for its network traffic.
+
+Default: undef
+\paragraph{\texttt{xop.s2s.whitelist}}
+Server to Server whitelist, comma delimited. 
+
+Default: undef
+\subsubsection{\texttt{xop.client}}
+\texttt{xop.client} properties define how the client portion of XOP should behave.
+\paragraph{\texttt{xop.client.authentication.provider}}
+What authentication provider should XOP use, options: 
+\begin{enumerate}
+    \item \texttt{SimpleAuthenticationProvider} -  Accept all usernames and passwords (no checking)
+\end{enumerate}
+
+Default: \texttt{edu.drexel.xop.client.SimpleAuthenticationProvider}
+\paragraph{\texttt{xop.client.port}}
+Which port should XOP accept client connections on. 
+
+Default: 5222
+\subsubsection{\texttt{xop.router}}
+\paragraph{\texttt{xop.router.core.pool.size}}
+Configure the core thread pool size for the router.
+
+Default: 0 
+\paragraph{\texttt{xop.router.max.pool.size}}
+Configure the maximum thread pool size for the router.
+
+Default: MAX INT
+\paragraph{\texttt{xop.router.iq.timeout}}
+How long to wait for a component to respond to an IQ request (an error is returned if there is no response in this time period)
+
+Unit: milliseconds
+
+Default: 2000
+\subsubsection{\texttt{xop.component}}
+Configuration section for component loading.
+\paragraph{\texttt{xop.component.autoload}}
+Should XOP load components, true/false.
+
+Default: true
+\paragraph{\texttt{xop.component.autoload.poll.period.ms}}
+How often should XOP check the autoload directory.
+
+Default: 5000
+\paragraph{\texttt{xop.component.autoload.dir}}
+Which directory should XOP look for its plugins.
+
+Default: \texttt{./plugins/}
+\subsubsection{\texttt{Gump.*}}
+Options with the prefix \texttt{Gump.} are passed directly to GUMP.
+\paragraph{\texttt{Gump.Discovery}}
+Which implementation should be used for discovery.
+
+Default: \texttt{mil.navy.nrl.discovery.imp.jmdns.JmDNSInstance}
+\paragraph{\texttt{Gump.Multicast}}
+Which multicast implementation should be used for discovery, options:
+
+\begin{enumerate}
+    \item \texttt{JDKMulticastSocket} - UDP Multicast
+    \item \texttt{NormMulticast} - NRL NORM Multicast (configurable via Gump.Norm.*)
+\end{enumerate}
+
+Default: \texttt{mil.navy.nrl.protean.gump.transport.multicast.imp.JDKMulticastSocket}
+\paragraph{\texttt{Gump.Transport}}
+Not used by XOP.
+
+Default: \texttt{mil.navy.nrl.protean.gump.transport.input.imp.tcp.TCPInstance}
+\paragraph{\texttt{Gump.Proxy}}
+Not used by XOP.
+
+Default: \texttt{mil.navy.nrl.protean.gump.proxy.imp.NullProxy}
+\begin{figure}
+\begin{verbatim}
+#XOP Properties File
+xop.device=eth0
+xop.debug=true
+xop.domain=proxy
+xop.s2s.whitelist=fireopen,conference.fireopen
+
+xop.client.authentication.provider=edu.drexel.xop.client.SimpleAuthenticationProvider
+xop.client.connection.reap.period.ms=5000
+xop.client.port=5222
+
+xop.router.core.pool.size=10
+xop.router.max.pool.size=20
+xop.router.iq.timeout=2000
+
+####xop component properties####
+xop.component.autoload=true
+xop.component.autoload.poll.period.ms=5000
+xop.component.autoload.dir=./plugins/
+
+####Gump Properties####
+Gump.Discovery=edu.drexel.xop.gump.sd.MultiInterfaceInstance
+Gump.Multicast=mil.navy.nrl.protean.gump.transport.multicast.imp.JDKMulticastSocket
+Gump.Transport=edu.drexel.xop.gump.NullTransportHandler
+Gump.Proxy=edu.drexel.xop.gump.NullProxy
+
+#Gump Norm options, only useful if Gump.Multicast is set to NormMulticast
+Gump.Norm.CC=off
+Gump.Norm.Sender.bufspace=5242880
+Gump.Norm.Reciever.bufspace=5242880
+Gump.Norm.SegmentSize=1400
+Gump.Norm.BlockSize=64
+Gump.Norm.NumParity=16
+Gump.Norm.RepairWindowSize=1048576
+
+\end{verbatim}
+\caption{Sample XOP properties file}
+\label{fig:sample-config-file}
+\end{figure}
+
+\subsection{Loading and Unloading Components}
+Component loading is controlled via the \texttt{xop.component.autoload} configuration options. Components are jar files that contain a component.xml file that is used to configure them. 
+
+\paragraph{Loading}
+Placing the component jar file in the \texttt{xop.component.autoload.dir} directory with autoloading enabled will load the component into XOP
+\paragraph{Unloading}
+Removing the component jar file from the 
+\texttt{xop.component.autoload.dir} directory will remove the component.
+
+\section{Running XO}
+There are two main ways to run XOP, dependent on how XOP was built.
+
+Note that both these methods will launch a GUI application to determine the network interface to use if it is not specified.
+\subsection{Release Bundled Version}
+The bundled version, just binaries no source, has a run script (\texttt{bundle.sh}) that checks for Java and runs XOP. If no suitable Java is found it resorts to the bundled version. As a result of this the bundled version does not require Java to be installed to run (Linux only).
+
+To Run:
+\begin{verbatim}
+$ ./bundle.sh
+\end{verbatim}
+\subsection{Built from Source Version}
+If XOP was built from source the best way to run it is to execute \texttt{java -jar xop.jar} from the \texttt{dist/} directory.
+
+To Run:
+\begin{verbatim}
+$ cd dist/
+$ java -jar xop.jar
+\end{verbatim}
+\section{Notable Components}
+\subsection{Multi User Chat (MUC)}
+The main functionality of XOP is contained in the MUC plugin, which allows for transparent group communication on the MANET.
+\subsubsection{Configuration}
+The MUC component has a few configuration options that are outside the normal XOP configuration. 
+
+\paragraph{\texttt{muc.port}}
+Which port (for multicast) should the MUC component listen on.
+
+Default: 5150
+\paragraph{\texttt{muc.blocking}}
+Determines whether the call to sendPacket blocks in the MUC component. Set to true, if you are getting an unusual latency (high).
+
+Default: false
+\paragraph{\texttt{muc.MultiInterface}}
+Should MUC listen and write to all interfaces for multicast traffic.
+
+Default: false
+\paragraph{\texttt{muc.interfaces}}
+Lists which interfaces MUC should listen on, comma delimited (overrides xop.device for MUC)
+
+\textbf{Must be set if \texttt{muc.MultiInterface} is set to true. }
+
+Default: undef
+\subsection{XOP Gateway (XOG)}
+
+\section{Known Issues}
+\end{document}

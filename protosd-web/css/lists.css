@@ -1,0 +1,112 @@
+body {
+  margin:0;
+  padding:0;      
+}
+.demoHead { 
+  display:block;  
+  margin-bottom:10px;   
+  border: 0;
+  padding: 0;
+  padding-top: 8px;
+  padding-bottom:10px;    
+  border-bottom: 1px solid #CCC;
+  font: normal 12px Verdana, Arial, Helvetica, sans-serif; 
+  color: #5A5655;   
+  background-color: #FAFAFA;    
+  text-align:center;
+}
+.demoHead h1,.demoHead h2,.demoHead h3{
+  margin:0;
+  padding:0;
+}
+.demoHead h1{
+  font: bold 22px Verdana, Arial, Helvetica, sans-serif;
+}
+.demoHead h2{
+  font: bold 18px Verdana, Arial, Helvetica, sans-serif;
+}
+.demoHead h3{
+  font: normal 12px Verdana, Arial, Helvetica, sans-serif;
+}
+.demoHead a.btn{
+  -moz-border-radius    : 5px;
+  -webkit-border-radius : 5px;
+  background            : #7D7D7D;
+  color                 : #FFF;
+  margin                : 2px 10px 0px 10px;
+  padding               : 5px 12px 5px 12px;
+  text-align            : center;
+  border                : 1px solid #7D7D7D;    
+  text-decoration       : none; 
+}
+.demoHead a.btn:hover{
+  background      : #7cb6e3;
+  color           : #FFFFFF;
+  border          : 1px solid #58B8E5;
+  text-decoration : none; 
+}
+.demoHead a.selected{
+  -moz-border-radius    : 5px;
+  -webkit-border-radius : 5px;
+  background            : #7cb6e3;
+  color                 : #FFFFFF;
+  margin                : 2px 10px 0px 10px;
+  padding               : 5px 12px 5px 12px;
+  text-align            : center;
+  border                : 1px solid #58B8E5;
+  text-decoration       : none; 
+}
+
+ul.hosts {
+	margin: 5px 1;
+	background: black; /*--Bg of the order numbers--*/
+	padding: 0 0 0 0px; /*--Distance between the order numbers--*/
+	border: 1px solid #111;
+}
+ul.hosts li {
+	margin: 0;
+	padding: 3px 3px;
+	color: #cbff78;
+	font-size: 0.98em;
+    font-weight:  normal;
+       /*--The bevel look is styled with various colors in the border properties below--*/
+	border-top: 1px solid #000;
+	border-bottom: 1px solid #353535;
+	border-right: 1px solid #333;
+	border-left: 1px solid #151515;
+	background: #222;
+    cursor:pointer;
+}
+
+ul.services {
+	margin: 5px 1;
+	background: black; /*--Bg of the order numbers--*/
+	padding: 0 0 0 0px; /*--Distance between the order numbers--*/
+	border: 1px solid #111;
+}
+ul.services li {
+	margin: 0;
+	padding: 3px 3px;
+	color: #cbff78;
+	font-size: 0.98em;
+	font-weight:  normal;
+       /*--The bevel look is styled with various colors in the border properties below--*/
+	border-top: 1px solid #000;
+	border-bottom: 1px solid #353535;
+	border-right: 1px solid #333;
+	border-left: 1px solid #151515;
+	background: #222;
+    cursor:pointer;
+}
+
+table, td, th, td, tr {
+    word-wrap: break-word;
+    border: 1px solid #353535;
+    font-size: 0.98em;
+    background: #222;
+    color: #cbff78;
+    table-layout: fixed
+}
+
+
+

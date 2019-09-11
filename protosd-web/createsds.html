@@ -1,0 +1,72 @@
+<html>
+<head>
+    <title>Create an mDNS Service</title>
+    <link rel="stylesheet" type="text/css" href="/css/protosd.css" />
+    <script type="text/javascript" src="/js/jquery-1.6.2.js"></script>
+    <script type="text/javascript" src="/js/sds.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#networkinterfaces').load('/api/sds/interfaces/htmlselect');
+            $('#indi-parameters').hide();
+
+            $("#create-sds-form").submit(function(event) {
+                /* stop form from submitting normally */
+                event.preventDefault();
+
+                var values = $('#create-sds-form').serialize();
+
+                alert("Values are " + values);
+
+                url = "/api/sds/form";
+
+                $.post( url, values,
+                    function( data ) {
+                        if (data == "SUCCESS")
+                            alert("Successfully created discovery System named: " + $('#Discovery_System_Name').val());
+                        else
+                            alert("Sorry, could not created discovery System. Error is: " + data);
+                    }
+                );
+            });
+        });
+
+        $(document).delegate("select#Service_Discovery_System", "change", function(){
+            var discoverySystem = $(this).val();
+
+            if (discoverySystem == "INDI")
+                $('#indi-parameters').show();
+            else
+                $('#indi-parameters').hide();
+
+            return true;
+          });
+    </script>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="floatleft">
+        <a href="/index.html"><img src="/icons/dashboard.png"></a>
+    </div>
+
+    <div class="floatleft" style="padding: 14px;">
+        <div class="rounded headerbox" style="width:600px">
+            <h1>Create an mDNS Service</h1>
+            <p>Use the form below to provide the details of the new service discovery system to be created</p>
+        </div>
+    </div>
+</div>
+
+<div class="clear"></div>
+
+<br>
+
+<!--#include virtual="/sdform.html"-->
+
+<br>
+<br>
+
+</body>
+</html>

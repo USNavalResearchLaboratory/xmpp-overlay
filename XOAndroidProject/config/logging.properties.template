@@ -1,0 +1,11 @@
+#
+# Rolling Log Files
+# Mostly taken from the default logging properties file
+#
+
+# Default global logging level java.util.logging.FileHandler, 
+# ----------------------------
+handlers=java.util.logging.ConsoleHandler
+.level=WARNING
+
+edu.drexel.xop.components.onetoone.level=FINE

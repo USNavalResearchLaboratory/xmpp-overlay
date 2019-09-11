@@ -1,0 +1,203 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{slp}
+\href{http://www.ietf.org/rfc/rfc2608.txt}{{The Service Location Protocol}}.
+\newline\urlprefix\url{http://www.ietf.org/rfc/rfc2608.txt}
+
+\bibitem{giordano2005dns}
+M.~Giordano, {DNS-Based discovery system in service oriented programming},
+  Lecture notes in computer science 3470 (2005) 840.
+
+\bibitem{zeroconfbook}
+D.~Steinberg, S.~Cheshire, Zero Configuration Networking: The Definitive Guide,
+  O'Reilly Media, Inc., 2005.
+
+\bibitem{guttman1999service}
+E.~Guttman, {Service location protocol: Automatic discovery of IP network
+  services}, IEEE Internet Computing.
+
+\bibitem{helal2002standards}
+S.~Helal, Standards for service discovery and delivery, IEEE pervasive
+  computing (2002) 95--100.
+
+\bibitem{jini}
+\href{http://www.jini.org/}{The {J}ini {W}eb site}.
+\newline\urlprefix\url{http://www.jini.org/}
+
+\bibitem{Jxta}
+D.~Brookshier, D.~Govoni, N.~Krishnan, J.~C. Soto, JXTA: Java P2P Programming,
+  Sams Publishing, Indianapolis, 2002.
+
+\bibitem{uddi}
+\href{http://www.uddi.org}{{UDDI Technical White Paper}}, Tech. rep., {OASIS
+  UDDI} (September 2000).
+\newline\urlprefix\url{http://www.uddi.org}
+
+\bibitem{limewire}
+\href{http://www.limewire.com}{{LimeWire}}.
+\newline\urlprefix\url{http://www.limewire.com}
+
+\bibitem{gnutella}
+{G}nutella, \url{http://www.gnutella.com/}.
+
+\bibitem{Ratnasamy01ascalable}
+S.~Ratnasamy, P.~Francis, M.~Handley, R.~Karp, S.~Shenker, A scalable
+  content-addressable network, in: IN PROC. ACM SIGCOMM 2001, 2001, pp.
+  161--172.
+
+\bibitem{Macker2010}
+J.~Macker, J.~Dean, A.~Harrison, I.~Taylor, {Multicast Service Discovery
+  Profiles for Deployment Within Dynamic Edge Networks}, in: IEEE Military
+  Communications Conference (MILCOM)., 2010.
+
+\bibitem{basagni2004mobile}
+S.~Basagni, M.~Conti, S.~Giordano, I.~Stojmenovi{\'c}, {Mobile Ad Hoc
+  Networking: Edited by Stefano Basagni...[et Al.]}, IEEE, 2004.
+
+\bibitem{broch1998}
+J.~Broch, D.~A. Maltz, D.~B. Johnson, Y.-C. Hu, J.~Jetcheva, A performance
+  comparison of multi-hop wireless ad hoc network routing protocols, in:
+  MobiCom '98: Proceedings of the 4th annual ACM/IEEE international conference
+  on Mobile computing and networking, ACM, New York, NY, USA, 1998, pp. 85--97.
+\newblock \href {http://dx.doi.org/http://doi.acm.org/10.1145/288235.288256}
+  {\path{doi:http://doi.acm.org/10.1145/288235.288256}}.
+
+\bibitem{perkins2000}
+C.~Perkins, Ad Hoc Networking, Addison-Wesley Professional, 2000.
+
+\bibitem{lee1999demand}
+S.~Lee, M.~Gerla, C.~Chiang, On-demand multicast routing protocol, in:
+  proceedings of IEEE WCNC, Vol.~99, Citeseer, 1999, pp. 1298--1302.
+
+\bibitem{camp2002}
+T.~Camp, J.~Boleng, V.~Davies, Wireless communications and mobile computing
+  (wcmc): Special issue on mobile ad hoc networking: Research, trends and
+  applications; a survey of mobility models for ad hoc network research 2~(5)
+  (2002) 483--502.
+
+\bibitem{macker2004simplified}
+J.~Macker, W.~Chao, J.~Dean, Simplified multicast forwarding in mobile ad hoc
+  networks, Tech. rep., Naval Research Lab Washington DC Information Technology
+  Div (2004).
+
+\bibitem{funkfeuer}
+\href{http://www.funkfeuer.at}{{Funkfeuer Free Net}}.
+\newline\urlprefix\url{http://www.funkfeuer.at}
+
+\bibitem{XMPPCore}
+\href{http://tools.ietf.org/html/rfc3920}{{Extensible Messaging and Presence
+  Protocol (XMPP): Core}}.
+\newline\urlprefix\url{http://tools.ietf.org/html/rfc3920}
+
+\bibitem{can}
+S.~Ratnasamy, P.~Francis, M.~Handley, R.~Karp, S.~Shenker, {A} {S}calable
+  {C}ontent-{A}ddressable {N}etwork, in: ACM SIGCOMM Conference, 2001.
+
+\bibitem{chord}
+I.~Stoica, R.~Morris, D.~Karger, F.~M. Kaashoek, H.~Balakrishnan,
+  \href{http://portal.acm.org/citation.cfm?id=383071}{{Chord: A scalable
+  peer-to-peer lookup service for internet applications}}, in: SIGCOMM '01:
+  Proceedings of the 2001 conference on applications, technologies,
+  architectures, and protocols for computer communications, Vol.~31, ACM Press,
+  New York, NY, USA, 2001, pp. 149--160.
+\newblock \href {http://dx.doi.org/10.1145/383059.383071}
+  {\path{doi:10.1145/383059.383071}}.
+\newline\urlprefix\url{http://portal.acm.org/citation.cfm?id=383071}
+
+\bibitem{lynn2011}
+K.~Lynn, D.~Sturek,
+  \href{http://www.ietf.org/internet-drafts/draft-lynn-dnsext-site-mdns-01.txt}{{Extended
+  Multicast DNS}} (Apr. 2011).
+\newline\urlprefix\url{http://www.ietf.org/internet-drafts/draft-lynn-dnsext-site-mdns-01.txt}
+
+\bibitem{Macker2011}
+J.~Macker, I.~Taylor, {INDI: Adapting the Multicast DNS Service Discovery
+  Infrastructure in Mobile Wireless Networks}, in: IEEE Military Communications
+  Conference (MILCOM)., 2011.
+
+\bibitem{rfc1035}
+P.~Mockapetris, \href{http://www.ietf.org/rfc/rfc1035.txt}{{Domain names -
+  implementation and specification}}, RFC 1035 (Standard), updated by RFCs
+  1101, 1183, 1348, 1876, 1982, 1995, 1996, 2065, 2136, 2181, 2137, 2308, 2535,
+  2845, 3425, 3658, 4033, 4034, 4035, 4343, 5936, 5966 (Nov. 1987).
+\newline\urlprefix\url{http://www.ietf.org/rfc/rfc1035.txt}
+
+\bibitem{rfc1886}
+S.~Thomson, C.~Huitema, \href{http://www.ietf.org/rfc/rfc1886.txt}{{DNS
+  Extensions to support IP version 6}}, RFC 1886 (Proposed Standard), obsoleted
+  by RFC 3596, updated by RFCs 2874, 3152 (Dec. 1995).
+\newline\urlprefix\url{http://www.ietf.org/rfc/rfc1886.txt}
+
+\bibitem{rfc4592}
+E.~Lewis, \href{http://www.ietf.org/rfc/rfc4592.txt}{{The Role of Wildcards in
+  the Domain Name System}}, RFC 4592 (Proposed Standard) (Jul. 2006).
+\newline\urlprefix\url{http://www.ietf.org/rfc/rfc4592.txt}
+
+\bibitem{li-lightweight}
+L.~Li, L.~Lamont, {A lightweight service discovery mechanism for mobile ad hoc
+  pervasive environment using cross-layer design}, in: Proc. 3rd IEEE
+  International Conference on Pervasive Computing and communications Workshops,
+  March2005, Citeseer, pp. 55--59.
+
+\bibitem{jmdns}
+{Arthur van Hoff}, \href{http://jmdns.sourceforge.net/}{{Java implementation of
+  Multicast DNS}}.
+\newline\urlprefix\url{http://jmdns.sourceforge.net/}
+
+\bibitem{ahrenholz2008core}
+J.~Ahrenholz, C.~Danilov, T.~R. Henderson, J.~H. Kim, {CORE}: A real-time
+  network emulator, in: IEEE Military Communications Conference, 2008, pp.
+  1--7.
+
+\bibitem{NS2_webpage}
+K.~Fall, K.~Varadhan, The network simulator -- {NS}-2,
+  http://www.isi.edu/nsnam/ns.
+
+\bibitem{quagga}
+\href{http://www.quagga.net/}{{Quagga Software Routing Suite}}.
+\newline\urlprefix\url{http://www.quagga.net/}
+
+\bibitem{ospf-mdr}
+\href{http://cs.itd.nrl.navy.mil/work/ospf-manet/index.php}{{OSPF MANET
+  Designated Routers (OSPF-MDR) Implementation.}}
+\newline\urlprefix\url{http://cs.itd.nrl.navy.mil/work/ospf-manet/index.php}
+
+\bibitem{rfc5614}
+R.~Ogier, P.~Spagnolo, Manet extension of ospf using cds flooding, Tech. rep.,
+  Internet Engineering Task Force, United States (2009).
+
+\bibitem{rfc5243}
+R.~Ogier, \href{http://www.ietf.org/rfc/rfc5243.txt}{{OSPF Database Exchange
+  Summary List Optimization}}, RFC 5243 (Informational) (May 2008).
+\newline\urlprefix\url{http://www.ietf.org/rfc/rfc5243.txt}
+
+\bibitem{rfc5838}
+A.~Lindem, S.~Mirtorabi, A.~Roy, M.~Barnes, R.~Aggarwal,
+  \href{http://www.ietf.org/rfc/rfc5838.txt}{{Support of Address Families in
+  OSPFv3}}, RFC 5838 (Proposed Standard) (Apr. 2010).
+\newline\urlprefix\url{http://www.ietf.org/rfc/rfc5838.txt}
+
+\bibitem{Macker2010a}
+J.~Macker, R.~Lass, D.~Millar, W.~Regli, I.~Taylor, {XO: XMPP Overlay Service
+  for Distributed Chat}, in: IEEE Military Communications Conference (MILCOM),
+  2010.
+
+\bibitem{Dean2011}
+J.~Dean, A.~Harrison, R.~N. Lass, J.~Macker, D.~Millar, I.~Taylor,
+  \href{http://portal.acm.org/citation.cfm?id=1988082.1988308}{{Client/server
+  messaging protocols in serverless environments}}, Journal of Network and
+  Computer Applications 34~(4) (2011) 1366--1379.
+\newblock \href {http://dx.doi.org/10.1016/j.jnca.2011.03.021}
+  {\path{doi:10.1016/j.jnca.2011.03.021}}.
+\newline\urlprefix\url{http://portal.acm.org/citation.cfm?id=1988082.1988308}
+
+\bibitem{xop2010}
+R.~N. Lass, J.~P. Macker, D.~Millar, W.~C. Regli, I.~Taylor, {XO: XMPP Overlay
+  Service for Distributed Chat}, in: Military Communications, 2011.
+
+\end{thebibliography}

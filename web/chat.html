@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>XOP Web Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <style>
+    body{
+      padding-top: 60px;
+    }
+    section {
+        padding-top:40px;
+    }
+    #msg {
+        font-size: 25px;
+        border: 1px solid #DDD;
+        border-radius: 5px;
+        -moz-border-radius: 5px;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 5px auto 20px;
+        padding: 5px;
+        border-image: initial;
+    }
+    #chats {
+        font-size:20px;
+    }
+    .msgln{
+        padding:3px;
+        margin-bottom:5px;
+    }
+    .msgln:nth-child(odd) {
+        background-color: #fff;
+    }
+    .msgln:nth-child(even) {
+        background-color: #ebebeb;
+    }
+    #chats, #presence {
+        height: 400px;
+    }
+    #chats {
+        overflow-y: scroll;
+    }
+    #presence ul {
+        margin-left: 5px;
+    }
+    #mucin {
+        height:80px;
+        font-size:16px;
+    }
+
+  </style>
+</head>
+<body>
+      <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/">XOP Web Interface</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li><a href="#about">About</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+    <div class="row">
+        <div class="span8 offset1">
+            <h1>MUC Room: &ldquo;<span id="roomname"></span>&rdquo;</h1>
+        </div>
+        <div class="span8 offset1">
+            <div class="well" id="chats"></div>
+        </div>
+        <div class="span2">
+            <div class="well" id="presence">
+                <ul>
+                    <li>Someday</li>
+                    <li>presence</li>
+                    <li>messages</li>
+                    <li>will go</li>
+                    <li>here</li>
+                </ul>
+            </div>
+        </div>
+        <div class="span10 offset1">
+            <textarea id="mucin" class="span10" placeholder="Someday, you can type here..."></textarea>
+        </div>
+    </div>
+    <section id="about">
+    <footer>
+    &copy; 2012 Drexel University
+    </footer>
+    </section>
+    </div> <!-- /container -->
+
+    <script src="./js/jquery.min.js"></script>
+    <script>
+        //if (!!window.EventSource) {
+            var source = new EventSource('/muc?node=' + getParameterByName("room"));
+            $('#roomname').html(getParameterByName("room"));
+            /*
+            source.onmessage = function(e) {
+                //var m = JSON.parse(e.data);
+                //appendChat(m.jid, m.msg);
+                appendChat("blah", e.data);
+            };
+            */
+            source.addEventListener('message', function(e) {
+                var m = JSON.parse(e.data);
+                appendChat(m.jid, m.msg);
+            }, false);
+
+            source.addEventListener('open', function(e) {
+                // Do nothing
+            }, false);
+
+            source.addEventListener('error', function(e) {
+                if (e.readyState == EventSource.CLOSED) {
+                    appendChat("NOTE", "Chat disconnected.")
+                }
+            }, false);
+        //} else {
+        //    appendChat("ERROR", "Your browser does not support Server-Sent Events (SSE). :(")
+        //}
+            
+        function appendChat(jid, data) {
+            var newcontent = document.createElement('span');
+            newcontent.innerHTML = '<div class="msgln well"><b>'+ jid +'</b>: '+ data +'<br></div>'
+
+            while (newcontent.firstChild) {
+                document.getElementById("chats").appendChild(newcontent.firstChild);
+            }
+            $("#chats").animate({ scrollTop: $("#chats").scrollTop() + $("#chats").height() }, 'slow');
+        }
+
+        function strip(html) {
+          var tmp = document.createElement("DIV");
+          tmp.innerHTML = html;
+          return tmp.textContent||tmp.innerText;
+        }
+
+        function getParameterByName(name)
+        {
+          name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+          var regexS = "[\\?&]" + name + "=([^&#]*)";
+          var regex = new RegExp(regexS);
+          var results = regex.exec(window.location.search);
+          if(results == null)
+            return "";
+          else
+            return decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+\documentclass{article}
+
+\newcommand{\todocomment}[2]{{\bf\sc (* Hey #1: #2 *) }}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\eg}{\textit{e.g.},~}
+\newcommand{\ie}{\textit{i.e.},~}
+\def\etc{{\fontfamily{cmr}\textit{\&}}\textit{c.}}
+
+\title{XO Developers' Guide}
+\date{\today}
+\author{Trevor Adams, Robert Lass, and David Millar}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+XOP is the XMPP Overlay Proxy developed at Drexel University's ACIN center.  It provides a
+distributed XMPP-like environment suitable for chat and messaging on MANET type networks.
+It also integrates easily with existing XMPP infrastructure.
+
+There is the XOP core service and three extension points for developers:
+\begin{enumerate}
+\item Authentication Providers
+\item Components
+\item Server IQ Handlers
+\end{enumerate}
+
+XOP core provides One-to-One messaging for clients connected to the same XOP instance,
+and it provides Server-to-Server connections via the dialback mechanism.
+All other functionality is provided via Components and Server IQ Handlers.
+
+Additionally, there are a number of utilities and services bundled with XOP
+that can be usefull for development including:
+\begin{enumerate}
+\item Xop Properties Framework
+\item Gump Service
+\end{enumerate}
+
+This Document begins with an overview of XOP's architecture, a
+description of the development utilities, documentation
+explaining how to augment XOP using it's extension points, followed by
+a brief explanation of XMUM, the XMPP Multi-User-Chat Using Multicast protocol.
+
+
+\section{Major Components}
+\subsection{YEAH}
+\section{Authentication Providers}
+\section{Plugins}
+\subsection{Definition of a Component}
+XOP components are extension subdomains (\eg \code{conference.proxy} for the
+muc component).
+
+Component classes are expected to implement the \code{VirtualComponent}
+interface, or extend the \code{ComponentBase} class which implements most of
+the \code{VirtualComponent} methods with the exception of the process packet
+method from \code{PacketListener}.  
+
+In addition to implementing the interface the component must also have a
+definition file named \code{component.xml} in the default package.  See
+Figure~\ref{fig:component-xml} for an example.  The class referenced in the
+definition file must be the one that implements the interface.  The component
+object and its definition file must be placed into a jar.  Only one component
+per jar is currently supported. 
+
+
+
+\begin{figure}
+\begin{verbatim}
+   <?xml version="1.0" encoding="UTF-8"?>
+   <component>
+       <class>edu.drexel.xopc.EchoComponent</class>
+       <name>name of component</name>
+       <description>Description of the component</description>
+       <subdomain>subdomain</subdomain>
+   </component>
+\end{verbatim}
+\caption{Example component.xml file.}
+\label{fig:component-xml}
+\end{figure}
+
+\subsection{Life Cycle of a Component}
+\begin{enumerate}
+\item Component is loaded: init method is called
+\item Running: Packet router sends all packets to the component
+\item Component is unloaded: stop method is called
+\end{enumerate}
+All hooks created during the initilization of the component and during
+its life should be removed when it is unloaded in the stop method.
+
+\subsection{Receiving Messages}
+The packet router calls the \code{processPacket()} method from all loaded
+components on every non-IQ packet it receives where the \code{to} field
+contains \code{[node@] subdomain.proxy}.  IQ messages with no node, are
+processed by the \code{IqManager} instead and are not forwarded to the
+component.
+
+\subsubsection{Handling IQ messages with no node}
+Clients may query a domain directly and supply no node information, eg: feature requests. These types of packets are not forwarded onto the component directly and have to be handled differently. The IqManager handles these packets using IqHandlers combined with filters. It loops through the filters until one accepts and gives the packet to the corresponding handler. If no filters accept the packet a \code{feature-not-implemented} error is sent to the requesting client. If a component needs to handle these types of packets they must add a hook into the IqManager and remove it when done.
+
+To handle IQ messages with no node, the component must create an
+\code{IqHandler} and a \code{PacketFilter}. The filters are queried in sequence
+and if the filter accepts the IQ packet is given to the Handler.
+
+The following should be added to the \code{init()} method of the component:
+\begin{verbatim}
+ifhe = new IqFilterHandlerEntry(); //where ifhe is a class variable
+ifhe.setFilter(PACKETFILTER); // insert your filter here
+ifhe.setHandler(IQHANDLER); // insert your handler here
+getComponentManager().getPacketRouter().getIqManager().addFilterHandler(ifhe);
+\end{verbatim}
+
+The following should be added to the \code{stop()} method to properly unload:
+
+\begin{verbatim}
+getComponentManager().getPacketRouter().getIqManager().removeFilterHandler(ifhe);
+\end{verbatim}
+
+\subsection{Sending Messages}
+To send messages, call the \code{sendPacket()} method on the
+\code{componentManager}, as follows:
+
+\begin{verbatim}
+getComponentManager().sendPacket(packet);
+\end{verbatim}
+
+\subsection{Intercepting Messages}
+Intercepting messages is sometimes required to implement features (such as file
+transfer).
+
+Pseudocode:
+
+
+\begin{verbatim}
+   Packet p ; // intercepted packet
+   if I want p then
+       process p
+       return false // to stop p from being delivered
+       return true // to allow it to continue
+   else
+       return true // a must, otherwise the packet gets dropped
+\end{verbatim}
+
+To do this, the following should be added to the \code{init()} method:
+
+\begin{verbatim}
+componentManager.addPacketInterceptor(this); 
+\end{verbatim}
+
+The following should be added to the \code{stop()} method:
+
+\begin{verbatim}
+   getComponentManager().removePacketInterceptor(this);
+\end{verbatim}
+
+
+\subsection{Loading Components}
+Copy the component's jar file into the plugins folder (and any libraries it
+needs into the plugins/lib folder). If XOP is running and the autoload
+components option is set, the components will be picked up within a few
+seconds.  
+
+\subsection{Discovery of Services}
+There are two different types of services that can be discovered, Server and Feature services. Server services are discovery for subdomains, i.e. conference.proxy while feature services are things like, muc. 
+
+\subsubsection{Server services}
+\paragraph{Advertising}
+
+The best way to advertise your component's services is to implement \code{ServerDiscoProvider}
+The following is example usage, assuming that you extend ComponentBase. 
+\begin{verbatim}
+DiscoItem item = null;
+public DiscoItem getServerItem() {
+    if(item == null){
+        item = new DiscoItem(getJid(),getName(), null, null);
+    }
+    return item;
+}
+\end{verbatim}
+
+
+\paragraph{Discovering}
+The best way to discover the presence of another service is to create IQ packets and route them to the server. 
+
+\todocomment{Trevor}{Add utility functions to do some processing}
+\subsubsection{Feature services}
+Feature services are defined by the XEP standard, e.g. for muc the feature is \code{http://jabber.org/protocol/muc}. To advertise the features the component needs to implement \code{DiscoProvider}
+
+For example, to support muc, the following is done:
+\begin{verbatim}
+private Set<String> features = new HashSet<String>();
+
+public void init(..){
+    features.add(ProxyDiscoIqHandler.INFO_NAMESPACE);
+    features.add(ProxyDiscoIqHandler.ITEM_NAMESPACE);
+    features.add("http://jabber.org/protocol/muc");
+}
+
+public Set<String> getFeatures() {
+    return features;
+}
+\end{verbatim}
+
+Note the \code{INFO\_NAMESPACE} and \code{ITEM\_NAMESPACE} are added to support service discovery and item discovery on the component's subdomain.
+\section{XMUM Protocol}
+The protocol for sending messages over the wire is referred to as the
+\textit{XMPP Muc Using Multicast} (XMUM) protocol.  XMUM is very similar to
+XMPP, but with a few modifications to deal with the fact that there is no
+server to record state, and that all messages travel directly between peers. 
+
+
+\begin{figure}
+\begin{verbatim}
+<presence id="li3i2-4" to="awesomeness@conference.proxy/swat1" from="swat1@proxy/Smack">
+  <x xmlns="http://jabber.org/protocol/muc"></x>
+</presence>
+\end{verbatim}
+\caption{Presence being sent to other users.}
+\label{fig:XMUM-presence}
+\end{figure}
+
+
+\begin{figure}
+\begin{verbatim}
+<presence id="li3i2-4" to="swat1@proxy/Smack" from="awesomeness@conference.proxy/swat1">
+  <x xmlns="http://jabber.org/protocol/muc#user">
+    <item affiliation="owner" role="moderator" jid="swat1@proxy/Smack"/>
+    <status code="201"/>
+  </x>
+</presence>
+\end{verbatim}
+\caption{Presence being sent to oneself.}
+\label{fig:XMUM-self-presence}
+\end{figure}
+
+\end{document}

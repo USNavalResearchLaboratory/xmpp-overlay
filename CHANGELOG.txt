@@ -1,0 +1,128 @@
+**********************Changelog: XMPP Overlay Proxy (XOP)***********************
+- : Bug Fix
++ : Feature addition
+* : Other / Refactoring
+********************************************************************************
+[XOP 0.8.1 2013-06-17]
++ have enterprise clients connected via XOG advertise presence and
+MUC occupants joins or leaves MUC rooms.
++ clients in the MANET are bridged into MUC rooms on enterprise openfire
+side.
++ enterprise clients show up in roster list once any MANET client adds
+the enterprise client to his/her roster list.
+* running XOP requires a built version and reference to the transport
+engine.
+* MUC component is no longer a jar component that is loaded by
+reflection-based autoloader.
+
+
+[XOP 0.8 2013-03-15]
+ * XO no longer uses a config file by default.  You can generate one with the
+   script included in bin/, if you would like to use one.
+ * XO now loads the server advertisement component when configured to do so
+ * Support for transport engine with persistence turned off by default
+ artf1469: Asymmetric Roster Lists
+ artf1472: XOP Client Rosters and MUC Room occupant lists not updated
+ artf1474: XOP CPU utilization issue with the /coreapps milcom demo
+ artf1475: Concurrent modification Exception when running XOP MILCOM demo
+ artf1476: MUC room occupants does not update when clients leave then return
+ artf1477: MUC room occupants cannot receive messages until they send a message
+ artf1478: Roster list shows logged out clients when re-logging back in.
+ artf1479: multiple XOP instances in linear topology does not forward MUC messages (smf is running)
+ artf1480: XOP will re-advertise discovered rooms
+ artf1481: XOP with integrated ProtoSD does not bind to multiple interfaces
+ artf1483: muc occupant on some clients do not update when occupant leaves room
+ 
+[XOP 0.7 2013-01-22]
+ * XO now uses the transport engine exclusively for all non-local network
+   communications.  GUMP is no longer being used.
+ * XO uses the latest version of ProtoSD for service discovery
+ * Fixed artf1468:  XO no longer hangs when quitting.  You can type "exit" in
+   the text controller ("clean" shutdown, sends goodbye messages, etc), or
+   <ctrl>-c (immediate shutdown).
+ * Removed packet viewer window, since we can't port this to Android, and we
+   don't use it anyway.  Use pidgin debug mode if you want to view packets.
+ * A lot of general code cleanup.  Deleted unused variables, removed useless
+   control statements, unused classes and functions, fixed "broken" comments,
+   etc.
+
+[ XOP 0.5   03.12.2012 ] *******************************************************
+ * Major PacketRouter rewrite: Everything has filters!
+ * Major MUC-component rewrite: Now actually uses PacketRouter
+ + One-to-One chat: Between clients on a local XOP instance works
+ + Local Rostering: implemented rosters for local clients
+ + Local Rostering: roster push on change
+ + Local presence messages are delivered
+ + XEP-0199: XMPP Ping IQ message supported.
+ + XOP can now be queried for local MUC room list (by spec.)
+ + XOG/S2S Gatewaying: Now compatible with new PacketRouter
+ + XOP Web Interface: Basic asynchronous XOP property querying
+ + XOP Web Interface: MUC room querying
+ + XOP Web Interface: Property interface
+ + XOP Web Interface: Live MUC room monitoring
+ - Removed FileDropBox class and functionality
+ - Fixed artf1395 : mcabber doesn't connect in CORE
+ - Fixed artf1396 : server advertisements over mDNS is broken
+ - Fixed artf1397 : OneTeam Linux client cannot initiate a session with XO.
+ - Fixed artf1398 : reconnecting after abrupt disconnect is broken
+ - Fixed artf1401 : null pointer with INDI when using mDNS
+ - Fixed artf1402 : r853 - iChat clients cannot join muc rooms
+ - Fixed artf1403 : seeing null users in chatrooms
+ - Fixed artf1404 : cannot reconnect to same muc room after abrupt disconnect
+ - Fixed artf1406 : Messages are queued up for ~1 minute, delivered all at once
+ - Fixed artf1408 : listen.py freezes when ichat sends msgs > 10char
+ - Fixed artf1409 : CPU pegged when running CORE demo with XOG
+ - Fixed artf1410 : MUC users outside XOG are misrepresented
+ - Fixed artf1412 : Starting XOP demo memory utilization linearly increases
+ - Fixed artf1413 : S2S fromServer throws Parse Exceptions
+ - Fixed artf1414 : MUC presence messages not being delivered from XOP to XOG
+ - Fixed artf1429 : ComponentManager doesn't support multiple components/domain
+ - Fixed artf1430 : Room advertisements crash XO
+ - Fixed artf1431 : Loggers in ProtoSD are printing log messages more than once
+ - Fixed artf1432 : Have XOP detect the active eth if the configured eth fails.
+ - Fixed artf1435 : XOP takes too long to create MUC
+ - Fixed artf1436 : unable to query for list of MUC rooms
+
+[ XOP 0.4	01.21.2011 ] *******************************************************
+Now with ProtoSD goodness
+ - Fixed concurrency bug with DuplicatePacketFilter (This was causing the
+   gateway to fail on occasion)
+ + Now using GUMP with ProtoSD, implemented as a singleton called XopNet
+ * Refactored discovery interface to decouple from XOP to a degree
+ * Cleaned up Properties file
+
+[ XOP 0.3	11.30.2010 ] *******************************************************
+Major Refactoring, some new features, bug fixes
+ * PacketRouter significantly simplified
+ * Cleaned up ClientProxy
+ * Made init() in BaseComponent final.  Overriding classes should override
+   initialize() instead now.
+ * Note: This breaks all older plugins (the latest revisions have been fixed).
+ * Cleaned up XOP initialization code (Run.java)
+ * Re-evaluated scoping of  several classes and variables
+ + Added a logging properties file.  Xop now checks for this and uses it if it
+   exists in the same directory that xop was invoked from
+
+[ XOP 0.2	08.15.2010 ] *******************************************************
+Significant Fixes and Feature Additions
+ + Component Autoloading
+ + File transfer component completed
+ + Initial Server-to-Server functionality added (outgoing and incoming)
+ + IQ Timeouts added to keep clients from waiting
+ + Error packet sent on route not found
+ + One-to-One messaging (not XEP-0174)
+ - Duplicate filtering for incoming XMUM packets
+ - XMUM Presence fixes
+ - Fixed several bugs enumerated by 'Findbugs'
+ * Removed spring dependancies, faster loading & more lightweight now
+ * Added threading so clients do not crash on internal packet handling error
+ * Refactored GUMP service
+ * Removed some old unused code
+ * Made logging levels more appropriate
+
+[ XOP 0.1b	04.29.2010 ] *******************************************************
+Initial release
+ - Fixed XMUM presence issues
+ + Local One-to-One Messaging
+ + Plain text client authentication
+ + Component Architecture

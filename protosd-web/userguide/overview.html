@@ -1,0 +1,92 @@
+
+
+<h1>Introduction</h1>
+
+<p>ProtoSD is a discovery system that can be used to advertise and discover services
+    on a network.   The system builds on mDNS by using the same service definitions
+    that are defined using the familiar Bonjour or mDNS style and abstracts these to
+    various discovery implementations for advertisement on the network.  Previous versions
+    included bindings to SLP but more recently we moved mDNS more central to the API
+    and ProtSd now supports JmDNS and INDI. INDI is effectively an overlay for mDNS
+    that adapts it for use in multi-hop mobile ad hoc network (MANET) network
+    environments.</p>
+
+
+<p> ProtoSD was designed as a discovery toolkit for exposing the raw functionality of
+    the underlying discovery system and to provide higher level interfaces for
+    consumption by users and programmers.  A key focus during all of this development
+    was to support MANET deployment for more distributed, serverless service discovery.
+    Due to the disruptive nature of the MANET environment, deploying survivable
+    group-oriented applications and enterprise
+    services across such network infrastructures requires a more flexible approach to
+    service discovery than typically provided by conventional design for more fixed
+    network operation.  ProtoSD therefore attempts to provide a toolkit that can
+    seamlessly integrate with existing applications (through the use of bonjour)
+    and at the same time, allow the same API to bridge into discovery protocols
+    intended for MANETs.</p>
+
+<h2>ProtoSD Discovery Protocols</h2>
+
+<p>ProtoSD currently supports two discovery protocols:</p>
+
+        <ol>
+            <li> <b>Multicast DNS</b> (mDNS) is a joint effort between the IETF Zero Configuration
+                Networking (zeroconf) and DNS Extensions (dnsext) working
+                groups<a href="#references"><sup>1</sup></a> and
+                provides a way of using familiar DNS programming interfaces, packet formats and
+                operating semantics, in a small network where no conventional DNS server has been
+                installed, through the use of multicast to perform DNS queries.  Clients perform DNS-like
+                queries for DNS-like resource records by sending UDP query and  packets using IP
+                Multicast on UDP port 5353.  We use the Java implementation of mDNS (JmDNS <a href="#references"><sup>2</sup></a>).</p>
+            </li>
+            <li> The <b>INdependent Discovery Interface (INDI)</b> is a discovery system supporting
+                operational modes suitable for use in multi-hop mobile wireless networks. To
+                this end, INDI supports three broad discovery modes that allow it to operate
+                reactively, proactively or a combination of both. It also employs the use of
+                timers that can be adjusted to the mobile scenario at hand.  INDI is built on the
+                JmDNS stack and therefore support the identical lower-layer network messaging packets
+                and DNS interfaces.  INDI therefore is  JmDNS compatible in terms of interface
+                and since JmDNS is fully compatible with Apple Bonjour, INDI also can be used to
+                interoperate with Bonjour and mDNS.</p>
+           </li>
+        </ol>
+
+
+<p>ProtoSD exposes a command-line tools that provides the same interface as DNS-SD, the Apple
+    command-line tool for Bonjour.
+
+
+<h2>Bonjour and mDNS</h2>
+
+<p>Bonjour is Apple's implementation of Zeroconf, a service discovery protocol, which provides a
+    generic method of discovering services on a local area network. It is widely used throughout
+    Mac OS X and allows users to set up a network without any configuration. Apple make widespread
+    use of it in Mac OS X to find printers, file-sharing servers, shared music (iTunes), shared
+    photos (iPhoto) and so forth.  Various vendors have also adopted the method to advertise their
+    network services e.g. Adobe Systems Creative Suite 3, Proteus, Adium, Fire, Pidgin, Skype,
+    Vine Server, and Elgato EyeTV to share local recordings with multiple clients, the Gizmo5 to
+    find other users on the local network, TiVo Desktop to find digital video recorders and
+    shared-media libraries and OmniFocus to synchronize projects and tasks across the Mac desktop
+    and the iPhone or iPod touch, to name a few.</p>
+
+<p>On the mac it is also used by the Safari browser to find local web servers and configuration
+    pages for local devices. Proto-SD takes advantage of this by advertising itself using bonjour
+    so that Safari (and other browsers) can discover its instances dynamically using their browser
+    bonjour plugin.</p>
+
+<p>Bonjour works within a single broadcast domain, which is usually a small area, without
+    special DNS configuration. Apple  made the source code of the Bonjour multicast DNS responder
+    (mDNS), the core component of service discovery, available as a Darwin open source
+    project. The project provides source code to build the responder daemon for a wide range of
+    platforms, including Mac OS 9, Mac OS X, Linux, BSD, Solaris, VxWorks, and Windows. There
+    are also mDNS interoperable implementations in other languages, such as JmDNS, for Java.</p>
+
+
+<h2>References</h2>
+ <hr />
+
+    <ol id="references">
+        <li>Multicast DNS, http://www.multicastdns.org/</li>
+        <li>JmDNS, http://www.json.org</li>
+    </ol>
+

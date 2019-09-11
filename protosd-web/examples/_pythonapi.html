@@ -1,0 +1,211 @@
+<h1>Service Advertisements using the Web API</h1>
+
+
+<p>ProtoSD can be accessed fully from python. There is a binding to the ProtoSD implemented in:</p>
+
+<div class="blackbox">
+    protosd/src/python
+</div>
+ <br>
+
+<p>and an example in that directory on its use.  This output of that example is shown here to
+    illustrate what you can do using python.</p>
+
+<h2>Create a Python Instance</h2>
+
+<p>To create a python instance, you import the ProtosdLib from the protosdlib.py file and instantiate
+it stating what "accept" types you would like to use i.e. JSON or XML:</p>
+
+<pre class="brush: python;">
+    from protosdlib import ProtosdLib
+    jprotlib = ProtosdLib(ProtosdLib.JSON)
+</pre>
+
+<p>The constant ProtosdLib.XML will switch this to output XML instead of JSON.</p>
+
+<h2>Getting ProtoSD Instance Information</h2>
+
+<p>To get a list of all ProtoSD instances running on the sever, you do the following:
+
+<pre class="brush: python;">
+resp, content = jprotlib.getSDSList()
+print content
+</pre>
+
+<p>This would return:</p>
+
+<pre class="brush: xml;">
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <protoSDList>
+        <proto_sd_instances>
+            <Discovery_System_Name>PROTOSD-INSTANCE-1</Discovery_System_Name>
+            <Discovery_System_ID>1</Discovery_System_ID>
+            <Operating_Mode>[CONSUMER]</Operating_Mode>
+        </proto_sd_instances>
+    </protoSDList>
+</pre>
+
+
+To get a detailed list of all ProtoSD instance, you would execute:
+
+<pre class="brush: python;">
+resp, content = jprotlib.getSDSDetailList()
+print content
+</pre>
+
+<p>Which would return something like this:</p>
+
+<pre class="brush: xml;">
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<protoSDDetailedList>
+    <proto_sd_instances>
+        <Discovery_System_Name>PROTOSD-INSTANCE-1</Discovery_System_Name>
+        <Discovery_System_ID>1</Discovery_System_ID>
+        <Service_Types>_http._tcp.local.</Service_Types>
+        <Operating_Mode>[CONSUMER]</Operating_Mode>
+        <Discovery_System_Parameters>
+            <Logging_Level>SEVERE</Logging_Level>
+            <Service_Discovery_System>JmDNS</Service_Discovery_System>
+            <Network_Interface>en0</Network_Interface>
+            <Events_Generated>false</Events_Generated>
+            <Service_Files>true</Service_Files>
+        </Discovery_System_Parameters>
+    </proto_sd_instances>
+</protoSDDetailedList>
+</pre>
+
+<p>To get the detail of ProtoSD instance with ID 1, you do the following:</p>
+
+<pre class="brush: python;">
+resp, content = jprotlib.getSDSDetailFor(1)
+print content
+</pre>
+
+<pre class="brush: xml;">
+<protoSDInstance>
+    <Discovery_System_Name>PROTOSD-INSTANCE-1</Discovery_System_Name>
+    <Discovery_System_ID>1</Discovery_System_ID>
+    <Service_Types>_http._tcp.local.</Service_Types>
+    <Operating_Mode>[CONSUMER]</Operating_Mode>
+    <Discovery_System_Parameters>
+        <Logging_Level>SEVERE</Logging_Level>
+        <Service_Discovery_System>JmDNS</Service_Discovery_System>
+        <Network_Interface>en0</Network_Interface>
+        <Events_Generated>false</Events_Generated>
+        <Service_Files>true</Service_Files>
+    </Discovery_System_Parameters>
+</protoSDInstance>
+</pre>
+
+<h2>Create a Service</h2>
+
+<p>To create a service on ProtoSD instance with ID 1, you would pass the following parameters to
+the createServiceOnSDS function, passing the ID of the protoSD instance you wish to create
+the service in first, and then the service parameters following this:</p>
+
+
+<pre class="brush: python;">
+resp, content = jprotlib.createServiceOnSDS(1, "MyPrinter", "_printer._tcp",
+    "local", "8888", "localhost", {"ink":"high", "paper":"low", "pages_left":78})
+print content
+</pre>
+
+<p>Which outputs the following response, indicating the service request was successful:</p>
+
+<pre class="brush: xml;">
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <ServiceInfoEndpoint>
+        <protosdID>1</protosdID>
+        <serviceID>0</serviceID>
+        <name>
+		    MyPrinter
+	    </name>
+        <type>
+		    _printer._tcp
+	    </type>
+        <domain>
+		    local
+	    </domain>
+        <address>
+		    localhost
+	    </address>
+        <port>
+            8888
+        </port>
+        <txt>
+            <entry>
+                <key>
+				    pages_left
+			    </key>
+                <value>
+				    78
+			    </value>
+            </entry>
+                <entry>
+                    <key>
+				        paper
+			        </key>
+                    <value>
+				        low
+			        </value>
+                </entry>
+            <entry>
+                <key>
+                    DiscoverySystem
+                </key>
+                <value>
+                    JmDNS
+                </value>
+            </entry>
+            <entry>
+                <key>
+				    ink
+			    </key>
+                <value>
+				    high
+			    </value>
+            </entry>
+        </txt>
+    </ServiceInfoEndpoint>
+</pre>
+
+<p> To get the services on ProtoSD instance with ID 1:</p>
+
+<pre class="brush: python;">
+resp, content = jprotlib.getSDServicesOnSDS(1)
+print content
+</pre>
+
+<pre class="brush: xml;">
+ <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <serviceOverviewList>
+        <ServiceInfo>
+            <name>MyPrinter</name>
+            <type>_printer._tcp</type>
+            <domain>local._tcp.local</domain>
+        </ServiceInfo>
+        <ServiceInfo>
+            <name>ians-air (2)</name>
+            <type>_afpovertcp._tcp</type>
+            <domain>local</domain>
+        </ServiceInfo>
+    </serviceOverviewList>
+</pre>
+
+<p>To find applications types of class "printer" on ProtoSD instance with ID 1, you would do the following:</p>
+
+<pre class="brush: python;">
+resp, content = jprotlib.findServicesOnSDSByApplication(1, "printer")
+print content
+</pre>
+
+</p>Which will result in the same output as previous.</p>
+
+<p>And finally, to finds all TCP services on ProtoSD instance with ID 1, you would execute:
+
+<pre class="brush: python;">
+resp, content = jprotlib.findServicesOnSDSByType(1, "_printer._tcp")
+print content
+</pre>
+
+</p>Which again will result in the same output for the printer we have advertised (and others if they exist).</p>

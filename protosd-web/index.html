@@ -1,0 +1,93 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="language" content="en" />
+    <meta name="description" content="ProtoSD: mDNS Service Browser"/>
+    <meta name="keywords" content="service browsing mDNS DNS"/>
+
+    <link rel="stylesheet" type="text/css" href="/css/protosd.css" />
+
+    <script type="text/javascript" src="/js/jquery-1.6.2.js"></script>
+    <script type="text/javascript" src="/js/quicksand.js"></script>
+    <title>ProtoSD: mDNS Service Browser</title>
+
+    <style>
+          .dashboard {
+            overflow: hidden;
+          }
+          .dashboard li {
+            display: block;
+            float: left;
+          }
+        </style>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            $('#sdsdetails').load('/ajax/sds/current');
+
+            $('.dashboard').load('/dash/fulldash', function() {
+            });
+        });
+
+        $(function() {
+            $('#load-dashboard a.button').click(function(e) {
+                $.get( $(this).attr('href'), function(data) {
+                    // alert (data);
+                    $('.dashboard').quicksand( $(data).find('li'),
+                            {
+                                adjustHeight: 'dynamic',
+                                attribute: function(v) {
+                                    return $(v).find('img').attr('src');
+                                }
+                            } ); // end dashboard method
+                });
+                e.preventDefault();
+            });
+
+        });
+
+    </script>
+
+
+</head>
+
+<body>
+
+
+<div class="container">
+
+    <div id="wrapper">
+
+        <div id="site">
+
+
+            <h1 class="splitter">Current Proto-SD &rarr; <span id="sdsdetails"></span></h1>
+
+
+            <div class="rounded nicebluebox">
+            <p>Welcome to the ProtoSD mDNS browser. The dashboard below provides an overview of the
+            available tools for browsing and discovering services.</p>
+            </div>
+
+            <br>
+            <div class="dasharea">
+                <p id="load-dashboard">
+                    <a class="button" href="/dash/fulldash">ShowAll</a>
+                    <a class="button" href="/dash/servicedash">Services</a>
+                    <a class="button" href="/dash/tooldash">Results/Settings</a>
+                    <a class="button" href="/dash/docdash">Documentation</a>
+                </p>
+            </div>
+            <ul class="dashboard">
+            </ul>
+        </div>
+
+
+    </div>
+
+</div><!-- page -->
+
+</body>
+</html>

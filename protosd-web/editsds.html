@@ -1,0 +1,196 @@
+<html>
+<head>
+    <title>ProtoSD Settings</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/protosd.css" />
+    <script type="text/javascript" src="/js/jquery-1.6.2.js"></script>
+
+    <style type="text/css">
+        a:link {color:#0000FF; text-decoration:underline;}      /* unvisited link */
+        a:visited {color:#0000FF; text-decoration:underline;}  /* visited link */
+        a:hover {color: #79c2ff; text-decoration:underline;}  /* mouse over link */
+        a:active {color:#0FFFF0;}  /* selected link */
+    </style>
+
+    <script type="text/javascript">
+
+        function getSDData(currentid) {
+            var ret;
+            $.ajax({
+                url: "/api/sds/" + currentid,
+                type: 'get',
+                dataType: 'json',
+                async: false,
+                success: function(data) {
+                    ret= data;
+                }
+            });
+            return ret;
+        }
+
+        function createList(navs) {
+            var ul= $('<ul>');
+            for (name in navs) {
+                var displayname = name.replace(/_/g, " ")
+                var nav= navs[name];
+                var li= $('<li>', {id: name});
+                if (nav instanceof Object) {
+                    li.html( displayname + ":");
+                    li.append(createList(nav));
+                } else {
+                    li.html( displayname + "=" + nav);
+                }
+                ul.append(li);
+            }
+            return ul;
+        }
+
+        function populateVariables(navs) {
+            for (name in navs) {
+                var value= navs[name];
+
+                if ((name != "Service_Types") && (value instanceof Object)) {
+                    populateVariables(value);
+                } else {
+                    if (name == "Service_Discovery_System") {
+                        if (value=="INDI") {
+                            $('#indi-parameters').show();
+                            }
+                    }
+
+                    var id= '#' + name;
+
+                    $(id).val(value);
+                }
+            }
+        }
+
+        function createListDiv(navs) {
+            var div= $('<div>');
+            var href= $('<a>', {href: "", id : "edit-sds", text : "Edit Parameters" });
+
+            div.append(href)
+
+            div.append(createList(navs));
+            return div;
+        }
+
+        function getCurrentSDSID() {
+            var currentid="1";
+
+            $.ajax({
+                url: "/ajax/sds/currentid",
+                type: 'get',
+                dataType: 'text',
+                async: false,
+                success: function(data) {
+                    currentid = data;
+                }
+            });
+            return currentid;
+        }
+        $(document).ready(function() {
+            $('#networkinterfaces').load('/api/sds/interfaces/htmlselect');
+            $('#ServiceTypesDiv').attr("style", "float:left; width: 700px;");
+            $('#Service_Types').attr("cols", "90");
+            $('#ServiceDiscoveryDiv').hide();
+            $('#indi-parameters').hide();
+
+            $("#create-sds-form").submit(function(event) {
+
+                /* stop form from submitting normally */
+                event.preventDefault();
+
+                var values = $('#create-sds-form').serialize();
+
+               // alert("Values are " + values);
+
+                url = "/api/sds/form/" + getCurrentSDSID();
+
+                $.post( url, values,   // should be a PUT but Jquery says PUT is not supported on all browsers....
+                    function( data ) {
+                        if (data == "SUCCESS")
+                            alert("Successfully updated discovery System named: " + $('#Discovery_System_Name').val());
+                        else
+                            alert("Sorry, could not update discovery System. Error is: " + data);
+                    }
+                );
+            });
+
+            $('.changeprotosd').load('/api/sds/htmloptions');
+            $('#create-sds-form').hide();
+
+            var currentid=getCurrentSDSID();
+
+            $('#sdsdetails').load('/ajax/sds/' + currentid);
+            $('#sdsvars').html(createListDiv(getSDData(currentid)));
+        });
+
+        $(document).delegate("select#protosd-select", "change", function(){
+            var newprotosdid =$(this).val();
+
+            $.post("/ajax/sds/currentid", { id: newprotosdid} );
+
+            $('#sdsvars').html(createListDiv(getSDData(newprotosdid)));
+
+            return true;
+        });
+
+        $(document).delegate('#edit-sds', "click", function(event) {
+            /* stop form from submitting normally */
+            event.preventDefault();
+            $('#create-sds-form').show();
+            $('#sdsvars').hide();
+
+            var currentid=getCurrentSDSID();
+
+            populateVariables(getSDData(currentid));
+        });
+
+    </script>
+
+</head>
+<body>
+
+
+<div class="header">
+    <div class="floatleft">
+        <a href="/index.html"><img src="/icons/dashboard.png"></a>
+    </div>
+
+    <div class="floatleft" style="padding: 14px;">
+        <div class="rounded headerbox">
+            <h1>ProtoSD Settings</h1>
+            <p>Settings and configuration for ProtoSD and its underlying discovery system bindings.</p>
+        </div>
+    </div>
+</div>
+<div class="clear"></div>
+
+<div class="container">
+
+    <div class="innerpage">
+
+        <p>Please use the following drop down box to change the current Proto-SD that you would like to work on:</p>
+
+        <h1><div class="changeprotosd"></div></h1>
+
+        <br>
+
+        <p>The details of the current ProtoSD that is selected is as follows:</p>
+
+        <!--#include virtual="/sdform.html"-->
+
+        <div id="sdsvars" class="rounded nicebox" style="width: 60%; margin: auto;">
+        </div>
+
+        <div style="clear: both;"></div>
+
+    </div>
+</div>
+
+<br>
+<br>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+\documentclass{article}
+
+\begin{document}
+\author{Drexel University - Applied Informatics Group\footnote{Contact Robert Lass with any comments: \texttt{urlass@cs.drexel.edu}}}
+\title{XO Features Checklist}
+\date{\today}
+
+\maketitle
+
+\section{Introduction}
+This document contains a table of features that XO should support.  Before a
+new version of XO is tagged out, each of these features should be tested to
+ensure that it works.  This document assumes that the version of the Transport
+Engine being used with it is working properly.
+
+When new features are added to XO, they should be added to the table below.
+
+The document uses the term ``client'' to refer to an XMPP client.  Obviously
+testing all XMPP clients is not feasible.  Therefore, testing all of the
+features with just pidgin is acceptable, provided that the red green demo also
+works.
+
+For all of the ``remote'' features, they should be tested with at least one
+intermediary node, to ensure the feature works over multiple hops.
+
+\noindent \begin{tabular}{|p{3cm}|p{7.25cm}|r|} \hline
+\textbf{Feature} & \textbf{Description} & \textbf{Status} \\ \hline
+
+Plaintext Client Connection & A client can log in to XO using no encryption. &
+    \\ \hline
+
+Secure Client Connection & A client can log in to XO using encrpytion. & \\
+    \hline
+
+Interface Binding & A client binds to the specified interface (eth0, lo, etc)
+    & \\ \hline
+
+XOP Forward Gateway & \texttt{xog} and \texttt{s2s} are loaded, and connect to 
+    an Openfire Server when a message is sent.  To test if it is connected,
+    look at the OpenFire admin panel.& \\ \hline
+
+XOG <-> XOG & An instance of \texttt{xog} and \texttt{s2s} are loaded on two 
+    different XO clouds, and are able to pass messages between them. To test if
+    it is connected, look at the log messages.& \\ \hline
+
+Non-Persistence & When persistence is set to 0, messages are not persisted. & \\
+    \hline
+
+Persistence & When persistence is set to 1, messages are persisted forever. & \\
+    \hline
+
+Local Roster List & When an client connects to an XO instance that already has
+    a client connected to it, both clients see each other in the ``Local'' roster
+    list. & \\ \hline
+
+Remote Roster List & When an client connects to an XO instance, and another
+    client is connected to another XO instance on the same MANET, both clients 
+    see each other in the ``Remote'' roster list. & \\ \hline
+
+Local Messaging & Two clients connect to the same XO instance, and each joins
+    the same chatroom.  Each sends a message to the chatroom, and each message 
+    appears in the sender's and receiver's chat window. & \\ \hline
+
+Remote Messaging & Two clients connect to two different XO instances on the
+    same MANET, and each joins the same chatroom.  Each sends a message to the
+    chatroom, and each message appears in the sender's and receiver's chat 
+    window. & \\ \hline
+
+Local Room Query & Client A connects to XO and joins chatroom ``foo''.  Client
+B connects to the same XO instance, and queries for a list of available rooms.
+Room ``foo'' should appear in the list. & \\ \hline
+
+Remote Room Query & Client A connects to XO and joins chatroom ``foo''.
+    Client B connects to a different XO instance on the same MANET, and queries
+    for a list of available rooms.  Room ``foo'' should appear in the list. 
+        & \\ \hline
+
+\end{tabular}
+
+\noindent \begin{tabular}{|p{3cm}|p{7.25cm}|r|} \hline
+\textbf{Feature} & \textbf{Description} & \textbf{Status} \\ \hline
+
+XO Shutdown & When using the text controller (default), typing 'exit' at the
+    command line shuts down XO within a reasonable amount of time (a few 
+    seconds on a typical computer) & \\ \hline
+
+Killing It & When using the text controller (default), pressing "<ctrl>-c"
+    kills XO instantly. & \\ \hline
+
+Server Advertisement & When the \texttt{ad} is loaded, XO should advertise
+    itself over mDNS as an XMPP server. & \\ \hline
+
+Local Presence & When two clients are logged into the same instance of XO,
+    they should see each others presence status (free-text) and mode (away,
+    available, etc) in the roster list. & \\ \hline
+
+Remote Presence & When two clients are logged into different instances of XO on
+    the same MANET, they should see each others presence status (free-text) and
+    mode (away, available, etc) in the roster list. & \\ \hline
+
+XOP Gateway Forwarding & Have XO load \texttt{s2s} and \texttt{xog}, and
+    connect it to an OpenFire server.  Connect a chat client to the OpenFire
+    server.  Connect another client to the XO instance.  Have each client send
+    a message.  Do both clients see both messages? & \\ \hline
+
+\end{tabular}
+
+
+\end{document}

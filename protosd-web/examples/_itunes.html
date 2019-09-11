@@ -1,0 +1,58 @@
+<div class="p"><!----></div>
+The command-line tool can be found in the protosd-home/bin directory.  You can use it and interchange command line usage with <em>dns-sd</em> and other bonjour tools to advertise and discover services on the network. For example, if you have a mac or any machine that has iTunes installed, then try the following:
+
+<div class="p"><!----></div>
+First, start your iTunes application.  Then,  type this command into a terminal window:
+
+<div class="p"><!----></div>
+
+<pre>
+&nbsp;cd&nbsp;bin
+&nbsp;./proto-sd&nbsp;-R&nbsp;ProtoTunes&nbsp;_daap&nbsp;local&nbsp;8088
+
+</pre>
+
+<div class="p"><!----></div>
+You should see "ProtoTunes" pop up in your iTunes app under the "SHARED" tree item on the left.
+
+<div class="p"><!----></div>
+The class and command-line tool proto-sd is pretty low level and is the entry point into using the proto-sd package.  However, used in conjunction with the other facilities it provides the discovery mechanisms to be able to advertise and discovery services dynamically within a network.  Next let's look at how "web-sd" uses this to expose services on the Web.
+
+<div class="p"><!----></div>
+ <a id="tth_sEc2.3"></a><h2>
+2.3&nbsp;&nbsp;Proto-SD Web Interface</h2>
+
+<div class="p"><!----></div>
+Just above proto-sd in Figure <a href="#fig:ProtoSDArchitecture">2.1</a>, is the web-sd component.  This uses proto-sd and the tools its discovers to expose these using the Web.  As shown in this architecture diagram, proto-sd populates the services it discovers into a separate container (see Discovered Services in Figure <a href="#fig:ProtoSDArchitecture">2.1</a>). Discovered Services is a Java interface that allows Web-SD or a third party application to gain notifications about services that are being discovered and also allows rendering of these services in specific user interfaces.
+
+<div class="p"><!----></div>
+For example, Web-SD implements its own container for Discovered Services, which can be serialized to a JSON<a href="#tthFtNtAAC" id="tthFrefAAC"><sup>2</sup></a> object.  This allows the services that are discovered to be sent, using JQuery<a href="#tthFtNtAAD" id="tthFrefAAD"><sup>3</sup></a> and ultimately AJAX, to a JsTree<a href="#tthFtNtAAE" id="tthFrefAAE"><sup>4</sup></a> for rendering as a tree within a browser.
+
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+<a id="tth_fIg2.2">
+</a> <div style="text-align:center"><a href="images/WebInterface">Figure</a>
+
+
+<div style="text-align:center">Figure 2.2: Web-SD web Interface</div> <a id="fig:web-sd">
+</a>
+
+</div>
+<div class="p"><!----></div>
+The Web-SD interface therefore takes advantage of this to allow users to browse proto-sd discovered services just like one would on a local file system.  The Web-sd interface is shown in Figure <a href="#fig:web-sd">2.2</a>.   The proto-sd web site is exposed using a REST-based framework using port 8080 (or the next available port) on the local host it is deployed on.   It also advertises itself on the network so that users with bonjour compatible browers can discover and locate web-sd on the network and browse to those server instances. So, after starting web-sd, either discover and browse to the Web site or type the following:
+
+<div class="p"><!----></div>
+
+<pre>
+http://localhost:8080/discover
+
+</pre>
+
+<div class="p"><!----></div>
+Web-sd has a normal view and a Tree view.  The tree view as discussed uses JsTree to provide a dynamic view of the services.  The Normal view simply lists the services as html lists.  Clicking on any of the services discovered (in the tree or on the hyperlinks) will navigate to a service specific Web page detailing the location and parameters of that service.  Then, if a compatible plugin is registered for this service type, you can also launch a client application to connect to this service directly from within the Web.
+
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+     <a id="tth_chAp3"></a>

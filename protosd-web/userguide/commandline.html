@@ -1,0 +1,142 @@
+<h1>Using the ProtoSD command Line</h1>
+
+<p>The ProtoSD command line interface is modelled after the Mac OSx 'dns-sd' command line tool but it only covers a
+    subset of the functionality of dns-sd, which deal with the registering and discovering of services. The DNS-SD
+    Bonjour command line tool uses the following syntax to register a service:
+
+<pre>
+dns-sd&nbsp;-R&nbsp;&lt;Name&#62;&nbsp;&lt;Type&#62;&nbsp;&lt;Domain&#62;&nbsp;&lt;Port&#62;&nbsp;[&lt;TXT&#62;...]&nbsp;(Register&nbsp;a&nbsp;service)
+</pre>
+
+<p> where:</p>
+
+<dl>
+ <dt><b>Name: </b></dt>
+	<dd> a human-readable name that uniquely describes the service. iTunes, for example, chooses a default music sharing name by combining the computer user's first and last name, as in &#207;saac Newton's Music". For most hardware devices, the default service name should be the full make and model of the product. For example, something like &#196;pple PowerBook G4". Remember, this is only the default name given out of the box, and the user should be allowed to customize the service name to differentiate multiple devices or services on the network.</dd>
+ <dt><b>Type: </b></dt>
+	<dd> a string of the form "_applicationprotocol._transportprotocol". Currently "_transportprotocol" must be either "_tcp" or "_udp". Your "_applicationprotocol" must be 14 characters or less and should be registered with the DNS-SD Web Site. If your protocol requires a well known port number, you should also register with  IANA so they can add you to the list of registered  protocol names and port numbers. Please see QA1312 for the list of service serviceTypes used by Mac OS X.</dd>
+ <dt><b>Domain:</b></dt>
+	<dd> You either pass "local" here or a specific string if you have some particular reason to want to register in some specific remote domain.</dd>
+ <dt><b>Port:</b></dt>
+	<dd> the port number of the service</dd>
+ <dt><b>TXT:</b></dt>
+	<dd>  The specific nature of the TXT record and how it is to be used is service type dependent. Each service type will define zero or more name/value pairs used to store meta-data about each service. These name/value pairs should be formatted as described in Section 6 of DNS-Based Service Discovery. Please see QA1306 for information on how TXT records should be formatted when using the Mac OS X APIs. Also, the DNS-SD Web Site has information regarding the currently defined name/value pairs for common service types.</dd>
+</dl>
+
+
+<div class="p"><!----></div>
+And the DNS-SD commands supported on ProtoSD are the following:
+
+<div class="p"><!----></div>
+
+<pre>
+&nbsp;proto-sd&nbsp;-R&nbsp;&lt;Name&#62;&nbsp;&lt;Type&#62;&nbsp;&lt;Domain&#62;&nbsp;&lt;Port&#62;&nbsp;[&lt;TXT&#62;...]&nbsp;(Register&nbsp;a&nbsp;service)
+&nbsp;proto-sd&nbsp;-P&nbsp;&lt;Name&#62;&nbsp;&lt;Type&#62;&nbsp;&lt;Domain&#62;&nbsp;&lt;Port&#62;&nbsp;&lt;Host&#62;&nbsp;&lt;IP&#62;&nbsp;[&lt;TXT&#62;...]&nbsp;&nbsp;(Proxy)
+&nbsp;proto-sd&nbsp;-B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Type&#62;&nbsp;&lt;Domain&#62;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Browse&nbsp;for&nbsp;services&nbsp;instances)
+
+</pre>
+
+<p>Which allow you to register a service from a host, register a service for a different host (proxy - useful for multicast
+    addresses) and to browse for services. ProtoSD also has a number of other command line options. To view these, type
+    ./proto-sd in protosd/bin to show the full list of usage instructions:</p>
+
+<pre>
+    Usage:	 [ options ]
+    Options:
+    	-R  --register-service
+    		proto-sd -R <Name> <Type> <Domain> <Port> [<TXT>...] (Register a service)
+    	-P  --register-proxy-service
+    		proto-sd -P <Name> <Type> <Domain> <Port> <Host> <IP> [<TXT>...]  (Proxy)
+    	-B  --browse-services
+    		proto-sd -B        <Type> <Domain>        (Browse for services instances)
+    	-i  --network-interface
+    		Set the Network Interface
+    	-w  --file-watcher
+    		USAGE: -w <interval in milliseconds> Discovers services by monitoring .services files
+            written by other ProtoSD instances. The interval the frequency (milliseconds) of
+            the polling
+    	-g  --web-gui
+    		Starts a Web server to expose the REST API and for browsing services using
+            http://localhost:8080/.
+    	-l  --log
+    		Enables loggingLevel, usage: -l FINEST FINE FINER CONFIG INFO NRLTRACE WARNING SEVERE OFF
+    	-e  --capture-events
+    		Captures multi-level events (services events, tcpdump, etc) from protosd as it runs
+            for analysis. The events are written to /tmp/protosd-current
+    	-ping  --do-ping-only
+    		USAGE: -ping <sender, receiver, both> <ping periodicity>: The ping mode specifies whether a
+            node acts as a sender, receiver or both. The Ping mode enables events and runs completely
+            passively in terms of service discovery but sends out pings to the network allowing you
+            to collect ping events to analyse the connectiveness of the nodes during a mobile emulation
+    	-indi  --indi-discovery-system
+    		Selects INDI for underlying discovery system with a number of optional parameters
+     that can be viewed by choosing the -indi-help protosd option
+    	-indi-help  --indi-discovery-system-help
+    		Provides help on using the INDI discovery system
+    	-sync  --synchronize-with-core
+    		USAGE: -sync file - waits for the provided file to be created before starting the
+            discovery system
+    	-h  --help
+    		Prints this message
+</pre>
+
+<p>Most of the command speak for themselves e.g. logging, setting the network interface, etc.  There are some
+command for collecting different kinds events e.g. ping to collect a -ping trace of an emulation, and -e to
+collect discovery events.  The -g flag starts the Web subsystem for exposing the REST interface and the Web
+GUI for protoSD and the -sync command synchronizes the start of the system with the start mobility button
+in the CORE emulation system.  The -indi command line option sets the mode for ProtoSD to use the INDI
+mDNS overlay and this in turn has a number of other options, which can be viewed by typing ./proto-sd -indi-help:</p>
+
+<pre>
+    INDI has the following space delimited key/value parameters:
+
+     - mode(reactive, oppcache or proactive): Lifetime (TTL) of
+       the service
+     - ttl(long): Lifetime (TTL) of the service (All times are in
+       milliseconds)
+     - rai(long): Service proactive readvertisement interval for
+       sending advertisements
+     - numra(int): Number of times to readvertise the service
+       (-1 = forever)
+     - cqi(comma seperated list of longs): Times a client queries
+       for a service e.g. 0,100,200
+     - sci(long): Proactive service cancel notification interval
+     - numscm(int): Number of times to send proactive service
+       cancellations
+     - swi(long): Offset interval before sending Client Queries
+     - port(int): Multicast port for JmDNS messages (default is
+       mDNS i.e. 5353)
+     - loopback(boolean): Enable or disable loopback (default is enabled)
+     - dups(boolean): Enable or disable advertisement duplicates (default
+       is false i.e. no duplicates)
+
+    (Do not use spaces between key/value pairs e.g. port=6868 is ok port = 6868 is not.)
+
+</pre>
+
+<p>So, for example:</p>
+
+<pre>
+    proto-sd&nbsp;-B&nbsp;indi&nbsp;mode=reactive&nbsp;port=6868&nbsp;cqi=0,100,200&nbsp;ttl=20000
+</pre>
+
+<p> Will make a reactive INDI client that queries on port 6868 at times 0, 100ms and 200ms and with
+    an advert timeout of 20 seconds.</p>
+
+<p>And:</p>
+
+<pre>
+    ./proto-sd -B -indi mode=reactive port=6868 cqi=0,100,200
+</pre>
+
+<p>Will make a reactive INDI client that queries on port 6868 at times 0, 100ms and 200ms, and:</p>
+
+<pre>
+    ./proto-sd -R VOIPServiceINDI _normvoip._udp local 8888 MC=224.5.6.7 -indi mode=proactive ttl=1000 rai=1000 numra=-1 numscm=0
+</pre>
+
+<p>Would start advertising a service proactively every second with a TTL of 1 second
+    until the program exited with no cancellation messages being propataged onto the network when a service is deleted</p>
+
+
+<p>The INDI parameters are described in detail in the <a href="#" onclick="changePage('indi')">INDI section</a> of this manual.</p>

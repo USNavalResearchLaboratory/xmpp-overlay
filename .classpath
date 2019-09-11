@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="components/s2s/src"/>
+	<classpathentry kind="src" path="components/o2o/src"/>
+	<classpathentry kind="src" path="components/xog/src"/>
+	<classpathentry kind="src" path="components/ad/src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/flexjson.jar"/>
+	<classpathentry kind="lib" path="lib/indi-jmdns.jar"/>
+	<classpathentry kind="lib" path="lib/jmdns-3.4.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/libidn-1.9.jar"/>
+	<classpathentry kind="lib" path="lib/mina-core.jar"/>
+	<classpathentry kind="lib" path="lib/proto-logging-0.1.jar"/>
+	<classpathentry kind="lib" path="lib/restless-1.0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.5.10.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-simple-1.5.10.jar"/>
+	<classpathentry kind="lib" path="lib/smack.jar"/>
+	<classpathentry kind="lib" path="lib/smackx.jar"/>
+	<classpathentry kind="lib" path="lib/timers-0.1.jar"/>
+	<classpathentry kind="lib" path="test-lib/junit-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/norm-jni.jar"/>
+	<classpathentry kind="lib" path="lib/concurrentlinkedhashmap-lru-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/protosd.jar"/>
+	<classpathentry kind="lib" path="lib/tinder-1.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/TransportEngineAPI.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/TransportEngine"/>
+	<classpathentry kind="output" path="build"/>
+</classpath>

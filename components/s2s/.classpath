@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/xop-trunk"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/flexjson.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/indi-jmdns.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/jmdns-3.4.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/libidn-1.9.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/mina-core.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/proto-logging-0.1.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/protosd.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/restless-1.0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/slf4j-api-1.5.10.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/slf4j-simple-1.5.10.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/smack.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/smackx.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/timers-0.1.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/tinder-1.2.2.jar"/>
+	<classpathentry kind="lib" path="/xop-trunk/lib/concurrentlinkedhashmap-lru-1.2.jar"/>
+	<classpathentry kind="output" path="build"/>
+</classpath>

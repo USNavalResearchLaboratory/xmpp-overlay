@@ -1,0 +1,116 @@
+<h1>INDI</h1>
+
+<p>INDI is a combinatory approach that, on the one hand, leverages existing standardized
+    service discovery messaging to ensure interoperability with mDNS<a href="#references"><sup>1</sup></a> and DNS, and then on the
+    other, provides flexible tuning of distributed modes of operation to serve the application's
+    needs for a particular type of network.</p>
+
+<p>The core hypothesis for INDI was that by layering decentralized and mobility tolerant
+    service discovery solutions upon an existing mDNS software infrastructure in a hybrid system,
+    we could significantly outperform the existing service discovery algorithms and timers
+    employed within mDNS for use within a dynamic context.  This technique provides a
+    bridging infrastructure for interoperability between mobile and fixed network
+    infrastructures. By using this flexibility of tuning modes, we can create a
+    proactive approach to service discovery, which exhibits considerable efficiency
+    and success rate gains over conventional techniques in transient mobile environments.  </p>
+
+<p>The architecture for INDI is provided in the following diagram:</p>
+
+<div style="width: 900px; margin: auto;">
+    <img src="/userguide/images/indiarch.png" alt="INDI Architecture" width="900px">
+</div>
+
+<p>The figure shows INDI's architecture and the schematic for the layering of the INDI design
+    profiles: reactive; opportunistic cache; and proactive, onto the existing advertiser and
+    responder, type, service, info resolvers. It can be seen that for the client side,
+    JmDNS entities are similar to INDI, the major differences being in the number of
+    resolvers deployed and the timings of retries to support the INDI design configurations.
+    However, the server side protocol is significantly different with INDI only requiring
+    advertising and responding roles compared with JmDNS<a href="#references"><sup>2</sup></a> that has probe, announce,
+    responder and renew roles. The advertising role in INDI is a simplification of the
+    probe, announce and renew roles in mDNS.</p>
+
+<h2>INDI Modes</h2>
+
+<p>INDI supports three broad discovery modes that allow it to operate reactively, proactively
+    or a combination of both:</p>
+
+<ol>
+<li> <b>Reactive:</b> where the consumer dispatches a service request using a query and providers
+    respond with a service advert (i.e. the Responder in the above Figure).
+</li>
+
+<li> <b>Proactive:</b> where the providers perform a service push by periodically
+    sending out their service adverts using multicast.
+</li>
+
+<li> <b>Opportunistic Caching:</b>  is based on the concept that if a consumer
+    queries for a service, other consumers may be interested in that service and can opportunistically
+    cache them for future use.
+</li>
+</ol>
+
+<h2>INDI Parameters</h2>
+
+<p>Obviously the impact of the modes fluctuates depending on whether the peer is operating as a
+    consumer or a provider of a service.  Underpinning these core modes are the following variables
+    that can be used to shape the different profiles (in brackets are the profiles they apply to):</p>
+
+<ul>
+<li>  <b>AdvertLifetime (All):</b> is the life time (TTL) that the service (or the advert) will be
+    available for. Each advert has a lifetime that can be specified in terms of milliseconds
+    through any of the modes.  For JmDNS, the advert lifetime (or RR TTL) is set to 1
+    hour.  In INDI, this can be specified using the mode and modified on a per-service
+    basis if desired. Typically for use on a wireless network with such transient connectivity,
+    the lifetime of some services be quite low (e.g., on the order of seconds in some cases).
+</li>
+
+<li>  <b>ReadvertisementInterval (All):</b> the interval (in milliseconds) at which providers of
+    services proactively readvertise services by sending out an advertisement onto the network. This
+    should typically be no more than 50% of the advert lifetime (which is also the setting in mDNS).
+</li>
+
+<li>  <b>NumReadvertisements (All):</b>  number of times to readvertise the service (-1 = forever)
+</li>
+
+<li>  <b>ClientQueryIntervals (All):</b>   INDI consumers typically perform queries according to a
+    retransmission backoff algorithm defined by a <em>timeouts</em> array.  The <em>timeouts</em> array
+    can be used to specify any sequence of timeouts that the user desires but typically such timeouts
+    are defined on a exponentially increasing rate (e.g. 100, 200, 400, 800 and 1600 are rates we
+    have used previously in a MANET environment).  This contrasts to the fixed intervals that are
+    set in the mDNS specification.  Therefore, the <em>ClientQueryIntervals</em> is an array containing
+    the relative times at which a client  attempts to query for a service, for example, 0,100,200,400
+    would mean to send messages  at time 0, 100, 200 and 400. Timeouts can be set at whatever times
+    the user chooses but by default they form an exponentially increasing series that can be set to
+    match the dynamics of a network  and statistical probability of discovery over time.
+</li>
+
+<li>  <b>ServiceCancelInterval (All):</b>  when a service is cancelled or deleted, this variable
+    specifies the relative times at which to send proactive service notifications are sent to the
+    network when a service is no longer available e.g. every 100 ms.
+</li>
+
+<li>  <b>NumServiceCancelMessages (All):</b>  number of times you should send proactive service
+    cancelled packets  out onto the network to notify other peers that this service is no longer
+    available.
+</li>
+
+<li> <b>Port:</b>  the port which to send JmDNS messages on (default is the mDNS port of 5353)
+</li>
+
+<li> <b>Send Wait Interval (OppCache):</b> Offset interval defined in milliseconds that the
+    client waits before sending client queries onto the network.  This parameter helps to avoid a
+    wasted query if the advert arrives shortly in its cache.
+</li>
+</ul>
+
+
+
+<h2>References</h2>
+ <hr />
+
+    <ol id="references">
+        <li>Multicast DNS, http://www.multicastdns.org/</li>
+        <li>JmDNS, http://www.json.org</li>
+    </ol>
+
